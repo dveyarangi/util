@@ -5,9 +5,14 @@ public class Angles
 	public static final double PI = Math.PI;
 	public static final double PI_2 = Math.PI*2;
 	public static final double PI_div_2 = Math.PI/2;
+	public static final double PI_div_3 = Math.PI/3;
+	public static final double PI_div_4 = Math.PI/4;
+	public static final double PI_div_5 = Math.PI/5;
 	public static final double PI_div_6 = Math.PI/6;
+	public static final double PI_div_12 = Math.PI/12;
 	public static final double PI_div_10 = Math.PI/10;
 	public static final double PI_div_20 = Math.PI/20;
+	public static final double PI_div_40 = Math.PI/40;
 	
 	public static final double TO_RAD = PI/180.;
 	public static final double TO_DEG = 180./PI;
@@ -29,7 +34,7 @@ public class Angles
 	 */
 	public static double normalize(double angle)
 	{
-		return angle < -180 ? angle+360 : angle > 180 ? angle-360 : angle;
+		return angle < -PI_div_2 ? angle+PI_2 : angle > PI_div_2 ? angle-PI_2 : angle;
 	}
 	
 	/** 
