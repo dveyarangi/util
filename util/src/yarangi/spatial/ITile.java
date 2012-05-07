@@ -6,7 +6,7 @@ public interface ITile <O> extends IAreaChunk
 	 * Adds an object to tile
 	 * @param cell
 	 * @param object
-	 * @return
+	 * @return true, if the tile contents were changed.
 	 */	
 	public boolean put(O o);
 	
@@ -18,7 +18,7 @@ public interface ITile <O> extends IAreaChunk
 	 * @param cell
 	 * @param sensor
 	 * @param queryId may be used to mark objects during query execution.
-	 * @return
+	 * @return true, if the query should stop after this tile
 	 */
 	public abstract <T extends ITile<O>> boolean query(ISpatialSensor<T, O> sensor, int queryId);
 //	public abstract boolean query(ISpatialSensor<ITile<O>, O> sensor, int queryId);
