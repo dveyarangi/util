@@ -2,7 +2,8 @@ package yarangi.spatial;
 
 public interface IGrid <C>
 {
-
+	public int getGridWidth();
+	public int getGridHeight();
 	public float getMinX();
 	public float getMaxX();
 	public float getMinY();

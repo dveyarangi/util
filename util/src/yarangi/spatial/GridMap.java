@@ -101,7 +101,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * @param y - cell reference y
 	 * @return
 	 */
-	protected abstract T createEmptyCell(int idx, double x, double y);
+	protected abstract T createEmptyCell(int i, int j, double x, double y);
 	
 	/**
 	 * Create a grid array. Array indexes must be consistent with
@@ -294,16 +294,33 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		return getTile( x, y ).get();
 	}
 	
+	public final T getTileAt(int i, int j)
+	{
+		int idx = indexAtTile( i, j );
+		T tile = map[idx];
+		if(tile == null)
+		{
+			tile = createEmptyCell( i, j, toXCoord( i ), toYCoord( j ) );
+			map[idx] = tile;
+			setModified(tile);
+		}
+		
+		return tile;
+	}
+	
 	public final void put(double x, double y, O object)
 	{
 		// TODO: dissolve, if hitting not in the cell center?
 //		System.out.println(x + " : " + y + " : " + at(x,y));
-		int idx = indexAtCoord(x,y);
+		int i = toGridXIndex(x);
+		int j = toGridYIndex(y);
+		int idx = indexAtTile( i, j );
 		T tile = map[idx];
 		if(tile == null)
 		{
-			tile = createEmptyCell( idx, toLowerCoord( x ), toLowerCoord( y ) );
+			tile = createEmptyCell( i, j, toXCoord( i ), toYCoord( j ) );
 			map[idx] = tile;
+			setModified(tile);
 		}
 		if(tile.put( object ))
 			setModified(tile);
