@@ -1,21 +1,30 @@
 package yarangi.spatial;
 
 
-public class Tile <O> implements ITile <O>
+public final class Tile <O> implements ITile <O>
 {
 	
+	/** 
+	 * tile index 
+	 */
+	private int i, j;
 	private double minx, miny;
 	private double maxx, maxy ;
 	
 	private O content;
 
-	public Tile(double x, double y, double width, double height)
+	public Tile(int i, int j, double x, double y, double width, double height)
 	{
+		this.i = i;
+		this.j = j;
 		this.minx = x;
 		this.miny = y;
 		this.maxx = x + width;
 		this.maxy = y + height;
 	}
+	
+	public int i() { return i; }
+	public int j() { return j; }
 	
 /*	public Tile(O content, double x, double y)
 	{
@@ -89,6 +98,17 @@ public class Tile <O> implements ITile <O>
 	public Area getArea()
 	{
 		return null;
+	}
+	
+	public String toString() {
+		return new StringBuilder()
+			.append("Tile [ idx: (").append( i ).append( "," ).append(j).append(")")
+			.append(", minx: ").append(minx)
+			.append(", miny: ").append(miny)
+			.append(", maxx: ").append(maxx)
+			.append(", maxy: ").append(maxy)
+			.append("]").toString();
+			
 	}
 
 }
