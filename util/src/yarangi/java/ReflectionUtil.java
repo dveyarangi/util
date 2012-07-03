@@ -15,32 +15,42 @@ public class ReflectionUtil
 	
 	/**
 	 * Creates class of specified name using the constructor with specified parameter values.
-	 * @throws RuntimeException on all failures.
+	 * 
 	 * Oh, sancta simplicitas!
 	 * @param <T>
 	 * @param className
 	 * @param ctorParams
 	 * @return
+	 * @throws RuntimeException on any reflection error
 	 */
 	public static <T> T createInstance(String className, Object ... ctorParams)
 	{
 		
 		Class <?> [] paramTypes = new Class [ctorParams.length];
 		for(int i = 0; i < ctorParams.length; i ++)
-			paramTypes[i] = getClass(ctorParams[i]);
+			paramTypes[i] = getClass(ctorParams[i]); // this does not work when ctor uses superclass of specified parameter
+
 		
-		// TODO: also super class permutations check? :)
+	// TODO: also super class permutations check? :)
 		
 		return createInstance(className, ctorParams, paramTypes);
 	}
 	
+	/**
+	 * Instantiates class of specified name using constructor with specified parameter types
+	 * @param className
+	 * @param ctorParams
+	 * @param paramTypes
+	 * @return
+	 * @throws RuntimeException on any reflection error
+	 */
 	public static <T> T createInstance(String className, Object [] ctorParams, Class<?> [] paramTypes)
 	{
 		T instance;
 		
 		try {
 			Class<T> type = (Class <T>) Class.forName(className);
-
+			
 			Constructor <T> ctor = type.getConstructor(paramTypes);
 		
 			instance = ctor.newInstance(ctorParams);
@@ -77,4 +87,13 @@ public class ReflectionUtil
 		return cl;
 	}
 	
+	public ReflectionUtil(Boolean test) 
+	{
+		
+	}
+	
+	public static void main(String ... args) {
+		
+	
+	}
 }

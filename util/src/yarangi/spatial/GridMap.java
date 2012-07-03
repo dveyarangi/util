@@ -421,7 +421,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	public void fireGridModified()
 	{
 		if(listener != null)
-			listener.cellsModified( modifiedTiles );
+			listener.tilesModified( modifiedTiles );
 		// resetting modified cells queue:
 		modifiedTiles = new LinkedList <T> ();
 	}

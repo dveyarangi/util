@@ -7,7 +7,7 @@ public class RandomUtil
 
 	private static Random random = new Random();
 	
-	public static int getRandomInt(int n)
+	public static int N(int n)
 	{ 
 		return random.nextInt(n) ;
 	}
@@ -22,11 +22,11 @@ public class RandomUtil
 	 * @param sigma
 	 * @return
 	 */
-	public static float N(float mean, float sigma)
+	public static float STD(float mean, float sigma)
 	{
 		return mean + sigma * (float)random.nextGaussian();
 	} 
-	public static double N(double mean, double sigma)
+	public static double STD(double mean, double sigma)
 	{
 		return mean + sigma * random.nextGaussian();
 	} 
@@ -48,7 +48,7 @@ public class RandomUtil
 	 */
 	public static boolean oneOf(int num)
 	{
-		return getRandomInt(num) == 0;
+		return N(num) == 0;
 	}
 	
 	/**

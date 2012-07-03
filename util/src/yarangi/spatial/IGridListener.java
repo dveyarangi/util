@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface IGridListener <K>
 {
-	public void cellsModified(final Collection <K> cells);
+	public void tilesModified(final Collection <K> tiles);
 	
 }
