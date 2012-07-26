@@ -2,7 +2,7 @@ package yarangi.spatial;
 
 
 
-public interface ITileMap <O> extends ISpatialIndex <Tile<O>, O>
+public interface ITileMap <O> extends ISpatialIndex <O>
 {
 
 }

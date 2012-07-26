@@ -20,7 +20,7 @@ public interface ITile <O> extends IAreaChunk
 	 * @param queryId may be used to mark objects during query execution.
 	 * @return true, if the query should stop after this tile
 	 */
-	public abstract <T extends ITile<O>> boolean query(ISpatialSensor<T, O> sensor, int queryId);
+	public abstract <T extends ITile<O>> boolean query(ISpatialSensor<O> sensor, int queryId);
 //	public abstract boolean query(ISpatialSensor<ITile<O>, O> sensor, int queryId);
 	
 	/**

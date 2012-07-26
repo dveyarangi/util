@@ -1,7 +1,7 @@
 package yarangi.spatial;
 
 
-public interface ISpatialIndex <T, O>
+public interface ISpatialIndex <O>
 {
 	/**
 	 * Iterates over specified area, reporting fully or partially fitting objects in index. 
@@ -17,7 +17,7 @@ public interface ISpatialIndex <T, O>
 	 * @param maxx
 	 * @param maxy
 	 */
-	public ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, Area area);
+//	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, Area area);
 //	public ISpatialSensor <K> query(ISpatialSensor <K> sensor, AABB area);
 	
 	/**
@@ -27,7 +27,7 @@ public interface ISpatialIndex <T, O>
 	 * @param maxx
 	 * @param maxy
 	 */
-	public ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, double x, double y, double radiusSquare);
+	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare);
 	
 	/**
 	 * Iterates over a line, originating at (ox, oy) width (dx, dy) length
@@ -39,6 +39,6 @@ public interface ISpatialIndex <T, O>
 	 * @param dy
 	 * @return
 	 */
-	public ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, double ox, double oy, double dx, double dy);
+	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy);
 
 }

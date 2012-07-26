@@ -7,9 +7,9 @@ public final class Tile <O> implements ITile <O>
 	/** 
 	 * tile index 
 	 */
-	private int i, j;
-	private double minx, miny;
-	private double maxx, maxy ;
+	private final int i, j;
+	private final double minx, miny;
+	private final double maxx, maxy ;
 	
 	private O content;
 
@@ -35,6 +35,7 @@ public final class Tile <O> implements ITile <O>
 		this.content = content;
 	}*/
 	
+	@Override
 	public boolean put(O content)
 	{
 		if(this.content != content) {
@@ -44,23 +45,27 @@ public final class Tile <O> implements ITile <O>
 		
 		return false;
 	}
+	@Override
 	public O get()
 	{
 		return content;
 	}
 
+	@Override
 	public double getX() { return minx; }
 
+	@Override
 	public double getY() { return miny; }
 //	
 //	public int i() { return i; }
 //	
 //	public int j() { return j; }
 
-	public <T extends ITile<O>> boolean query(ISpatialSensor<T, O> sensor, int queryId)
+	@Override
+	public <T extends ITile<O>> boolean query(ISpatialSensor<O> sensor, int queryId)
 	{
 		if(content != null)
-			return sensor.objectFound( (T)this, content );
+			return sensor.objectFound( content );
 		return false;
 	}
 	@Override
@@ -75,6 +80,7 @@ public final class Tile <O> implements ITile <O>
 		return false;
 	}
 	
+	@Override
 	public boolean overlaps(double xmin, double ymin, double xmax, double ymax)
 	{
 		return ( (xmax >= minx && xmax <= maxx) ||
@@ -89,9 +95,13 @@ public final class Tile <O> implements ITile <O>
 			   );
 	}
 
+	@Override
 	public double getMinX() { return minx; }
+	@Override
 	public double getMinY() { return miny; }
+	@Override
 	public double getMaxX() { return maxx; }
+	@Override
 	public double getMaxY() { return maxy; }
 
 	@Override
@@ -100,6 +110,7 @@ public final class Tile <O> implements ITile <O>
 		return null;
 	}
 	
+	@Override
 	public String toString() {
 		return new StringBuilder()
 			.append("Tile [ idx: (").append( i ).append( "," ).append(j).append(")")

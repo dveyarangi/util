@@ -14,7 +14,7 @@ public class AABB implements Area
 	/**
 	 * center point
 	 */
-	private Vector2D ref;
+	private final Vector2D ref;
 	
 	/**
 	 * half-width of the square
@@ -82,21 +82,25 @@ public class AABB implements Area
 	 * {@inheritDoc}
 	 */
 
+	@Override
 	public double getMaxRadius() { return rmax; }
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final double getOrientation() { return a; }
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final Vector2D getAnchor() { return ref; }
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final void setOrientation(double a) { this.a = a; }
 	
 	/**
@@ -166,6 +170,7 @@ public class AABB implements Area
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean equals(Object o)
 	{
 		return o == this;
@@ -174,11 +179,13 @@ public class AABB implements Area
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Area clone() { return new AABB(this); }
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String toString()
 	{
 		return "AABB [loc:" + ref.x() + ":" + ref.y() + "; r:(" + rx +"," +ry +"); a:" + a + "]"; 
@@ -220,6 +227,14 @@ public class AABB implements Area
 	public void setPassId(int id) {	this.passId = id; }
 	public double getRX() {return rx; }
 	public double getRY() {return ry; }
+	public double getCenterX()
+	{
+		return ref.x();
+	}
+	public double getCenterY()
+	{
+		return ref.y();
+	}
 
 
 }

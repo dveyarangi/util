@@ -22,37 +22,37 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	/**
 	 * dimensions of area this grid represents
 	 */
-	private float width, height;
+	private final float width, height;
 	
 	/**
 	 * edges of represented area
 	 */
-	private float minX, minY, maxX, maxY;
+	private final float minX, minY, maxX, maxY;
 
 	/**
 	 * size of single grid cell
 	 */
-	private int cellSize; 
+	private final int cellSize; 
 	
 	/** 
 	 * 1/cellSize, to speed up some calculations
 	 */
-	private double invCellsize;
+	private final double invCellsize;
 	
 	/** 
 	 * cellSize/2
 	 */
-	private float halfCellSize;
+	private final float halfCellSize;
 	
 	/**
 	 * grid dimensions 
 	 */
-	private int gridWidth, gridHeight;
+	private final int gridWidth, gridHeight;
 	
 	/**
 	 * grid dimensions 
 	 */
-	private int halfGridWidth, halfGridHeight;
+	private final int halfGridWidth, halfGridHeight;
 	
 	/**
 	 * Used by query methods to mark tested objects and avoid result duplication;
@@ -238,17 +238,24 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	public final float getWidth() { return width; }
 
 	
+	@Override
 	public float getMaxX() { return maxX; }
+	@Override
 	public float getMinX() { return minX; }
+	@Override
 	public float getMaxY() { return maxY; }
+	@Override
 	public float getMinY() { return minY; }
 	
 	/**
 	 * @return size (height and width) of a single cell
 	 */
+	@Override
 	public final int getCellSize() { return cellSize; }
 	protected final float getHalfCellSize() { return halfCellSize; }
+	@Override
 	public final int getGridWidth() { return gridWidth; }
+	@Override
 	public final int getGridHeight() { return gridHeight; }
 	
 	/**
@@ -300,9 +307,11 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		T tile = map[idx];
 		if(tile == null)
 		{
-			tile = createEmptyCell( i, j, toXCoord( i ), toYCoord( j ) );
+			double x = toXCoord( i );
+			double y = toXCoord( j );
+			tile = createEmptyCell( i, j, x, y );
 			map[idx] = tile;
-			setModified(tile);
+			setModified(x, y);
 		}
 		
 		return tile;
@@ -320,10 +329,10 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		{
 			tile = createEmptyCell( i, j, toXCoord( i ), toYCoord( j ) );
 			map[idx] = tile;
-			setModified(tile);
+			setModified(x ,y);
 		}
 		if(tile.put( object ))
-			setModified(tile);
+			setModified(x, y);
 				
 	}
 	
@@ -336,7 +345,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 			return;
 		
 		if(tile.remove( object ))
-			setModified(tile);
+			setModified(x, y);
 				
 	}
 	
@@ -394,9 +403,9 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * Adds a cell to modified cells queue.
 	 * @param cell
 	 */
-	public void setModified(T tile)
+	public void setModified(double x, double y)
 	{
-		modifiedTiles.add( tile );
+		modifiedTiles.add( getTile( x, y ) );
 	}
 	
 	public void setModified(int x, int y)
@@ -413,6 +422,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		return modifiedTiles;
 	}
 	
+	@Override
 	public void setModificationListener(IGridListener <T> l) { listener = l; }
 	
 	/**
@@ -431,7 +441,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * {@inheritDoc}
 	 * TODO: slow
 	 */
-	public ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, Area area)
+	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, Area area)
 	{
 		if(area == null)
 			throw new IllegalArgumentException("Area cannot be null.");
@@ -446,7 +456,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	/**
 	 * {@inheritDoc}
 	 */
-	public final ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, double x, double y, double radiusSquare)
+	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
 	{
 		// TODO: spiral iteration, remove this root calculation:
 		double radius = Math.sqrt(radiusSquare);
@@ -476,7 +486,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		return sensor;
 	}
 
-	public final ISpatialSensor <T, O> query(ISpatialSensor <T, O> sensor, double ox, double oy, double dx, double dy)
+	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
 	{
 		int currGridx = toGridXIndex(ox);
 		int currGridy = toGridYIndex(oy);
@@ -533,7 +543,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 			tile = getTileByIndex(currGridx, currGridy);
 			if(tile != null)
 			{
-				if(tile.query((ISpatialSensor <ITile<O>, O>)sensor, passId))
+				if(tile.query(sensor, passId))
 					return sensor;
 			}
 		}		
@@ -546,10 +556,11 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		public void setObject(T object);
 	}
 	
-	private IObjectConsumer <O> addingConsumer = new IObjectConsumer <O>()
+	private final IObjectConsumer <O> addingConsumer = new IObjectConsumer <O>()
 	{
 		private O object;
 		
+		@Override
 		public void setObject(O object)
 		{
 			this.object = object;
@@ -564,10 +575,11 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		}
 	};
 	
-	private IObjectConsumer <O> removingConsumer = new IObjectConsumer <O>()
+	private final IObjectConsumer <O> removingConsumer = new IObjectConsumer <O>()
 	{
 		private O object;
 		
+		@Override
 		public void setObject(O object)
 		{
 			this.object = object;
@@ -584,21 +596,23 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	
 	private interface IQueryingConsumer <T, O> extends IChunkConsumer
 	{
-		public void setSensor(ISpatialSensor <T, O> sensor);
+		public void setSensor(ISpatialSensor <O> sensor);
 
 		public void setQueryId(int nextPassId);
 	}
 	
-	private IQueryingConsumer <T, O> queryingConsumer = new IQueryingConsumer <T, O>()
+	private final IQueryingConsumer <T, O> queryingConsumer = new IQueryingConsumer <T, O>()
 	{
-		private ISpatialSensor <T, O> sensor;
+		private ISpatialSensor <O> sensor;
 		private int passId;
 		
-		public void setSensor(ISpatialSensor <T, O> sensor)
+		@Override
+		public void setSensor(ISpatialSensor <O> sensor)
 		{
 			this.sensor = sensor;
 		}
 		
+		@Override
 		public void setQueryId(int passId)
 		{
 			this.passId = passId;

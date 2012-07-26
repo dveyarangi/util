@@ -139,6 +139,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void addObject(Area area, O object) 
 	{
 		if(object == null)
@@ -150,6 +151,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected O removeObject(Area area, O object) 
 	{
 		removingConsumer.setObject( object );
@@ -162,6 +164,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * {@inheritDoc}
 	 * TODO: not efficient for large polygons:
 	 */
+	@Override
 	protected void updateObject(Area old, Area area, O object) 
 	{
 		removeObject(old, object);
@@ -172,7 +175,8 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * {@inheritDoc}
 	 * TODO: slow
 	 */
-	public ISpatialSensor <IAreaChunk, O> query(ISpatialSensor <IAreaChunk, O> sensor, Area area)
+/*	@Override
+	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, Area area)
 	{
 		if(area == null)
 			throw new IllegalArgumentException("Area cannot be null.");
@@ -182,7 +186,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		area.iterate( cellSize, queryingConsumer );
 
 		return sensor;
-	}
+	}*/
 	
 
 	protected final int getNextPassId()
@@ -203,7 +207,8 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	/**
 	 * {@inheritDoc}
 	 */
-	public final ISpatialSensor <IAreaChunk, O> query(ISpatialSensor <IAreaChunk, O> sensor, double x, double y, double radiusSquare)
+	@Override
+	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
 	{
 		// TODO: spiral iteration, remove this root calculation:
 		double radius = Math.sqrt(radiusSquare);
@@ -241,7 +246,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 					
 					// TODO: make it strictier:
 //					if(radiusSquare >= distanceSquare)
-						if(sensor.objectFound(chunk, object/*, distanceSquare*/))
+						if(sensor.objectFound(object/*, distanceSquare*/))
 							break;
 					
 					object.getArea().setPassId( passId );
@@ -252,7 +257,8 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		return sensor;
 	}
 	
-	public final ISpatialSensor <IAreaChunk, O> query(ISpatialSensor <IAreaChunk, O> sensor, double ox, double oy, double dx, double dy)
+	@Override
+	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
 	{
 		int currGridx = toGridIndex(ox);
 		int currGridy = toGridIndex(oy);
@@ -311,7 +317,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 				if(object.getArea().getPassId() == passId)
 					continue;
 				if(toGridIndex(chunk.getX()) == currGridx && toGridIndex(chunk.getY()) == currGridy)
-				if(sensor.objectFound(chunk, cell.get(chunk)))
+				if(sensor.objectFound(cell.get(chunk)))
 					break;
 				
 				object.getArea().setPassId( passId );
@@ -326,11 +332,12 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		public void setObject(T object);
 	}
 	
-	private IObjectConsumer <O> addingConsumer = new IObjectConsumer <O>()
+	private final IObjectConsumer <O> addingConsumer = new IObjectConsumer <O>()
 	{
 		private O object;
 		private int x, y;
 		
+		@Override
 		public void setObject(O object)
 		{
 			this.object = object;
@@ -349,11 +356,12 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		}
 	};
 	
-	private IObjectConsumer <O> removingConsumer = new IObjectConsumer <O>()
+	private final IObjectConsumer <O> removingConsumer = new IObjectConsumer <O>()
 	{
 		private O object;
 		private int x, y;
 		
+		@Override
 		public void setObject(O object)
 		{
 			this.object = object;
@@ -379,24 +387,26 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	};
 	private interface IQueryingConsumer <T extends ISpatialObject> extends IChunkConsumer
 	{
-		public void setSensor(ISpatialSensor <IAreaChunk, T> sensor);
+		public void setSensor(ISpatialSensor <T> sensor);
 
 		public void setQueryId(int nextPassId);
 	}
 	
-	private IQueryingConsumer <O> queryingConsumer = new IQueryingConsumer <O>()
+	private final IQueryingConsumer <O> queryingConsumer = new IQueryingConsumer <O>()
 	{
 		private O object;
 		private int x, y;
 		private Map <IAreaChunk, O> cell;
-		private ISpatialSensor <IAreaChunk, O> processor;
+		private ISpatialSensor <O> processor;
 		private int passId;
 		
-		public void setSensor(ISpatialSensor <IAreaChunk, O> processor)
+		@Override
+		public void setSensor(ISpatialSensor <O> processor)
 		{
 			this.processor = processor;
 		}
 		
+		@Override
 		public void setQueryId(int passId)
 		{
 			this.passId = passId;
@@ -423,7 +433,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 //					System.out.println(cell.get(c));
 				{
 					object.getArea().setPassId( passId );
-					terminate = processor.objectFound(c, object);
+					terminate = processor.objectFound(object);
 					if(terminate)
 						return true;
 					

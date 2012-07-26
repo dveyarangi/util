@@ -1,6 +1,6 @@
 package yarangi.spatial;
 
-public interface ISpatialSensor <T, O> 
+public interface ISpatialSensor <O> 
 {
 	/**
 	 * Called on object detection.
@@ -8,7 +8,7 @@ public interface ISpatialSensor <T, O>
 	 * @param object
 	 * @return true, if the query should stop after this object.
 	 */
-	public boolean objectFound(T tile, O object);
+	public boolean objectFound(O object);
 	
 	/**
 	 * Resets sensor collections; called by {@link ISpatialIndex} at start of each query.

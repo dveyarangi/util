@@ -8,14 +8,14 @@ import java.util.Set;
  * 
  * @param <T> stored element type.
  */
-public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpatialSetIndex <IAreaChunk, K>
+public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpatialSetIndex <K>
 {
 	
 	/**
 	 * Id to location mapping, to keep and eye on object updates.
 	 * TODO: switch to primitive int key hash (Trove?)
 	 */
-	private HashMap <K, Area> locations = new HashMap <K, Area> ();
+	private final HashMap <K, Area> locations = new HashMap <K, Area> ();
 	
 //	private TIntObjectMap <AABB> locations = new TIntObjectHashMap <AABB> ();
 	
@@ -77,6 +77,7 @@ public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpat
 	 * Note: The collection is backed up by the indexer and should not be modified. 
 	 * @return
 	 */
+	@Override
 	public Set <K> keySet() { return locations.keySet(); }
 	
 	/**
