@@ -188,6 +188,60 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		return sensor;
 	}*/
 	
+	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
+	{
+		return queryAABB( sensor, aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY() );
+	}
+	@Override
+	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double rx, double ry)
+	{
+		double minx = cx - rx;
+		double miny = cy - ry;
+		double maxx = cx + rx;
+		double maxy = cy + ry;
+		int minIdxx = (int)Math.floor( minx/cellSize ) * cellSize;
+		int minIdxy = (int)Math.floor( miny/cellSize ) * cellSize;
+		
+		int maxIdxx = (int)Math.ceil(  maxx/cellSize ) * cellSize;
+		int maxIdxy = (int)Math.ceil(  maxy/cellSize ) * cellSize;
+		
+		int currx, curry;
+		int passId = getNextPassId();
+		O object;
+		
+		Map <IAreaChunk, O> cell;
+		AABB objectArea;
+		
+		for(currx = minIdxx; currx <= maxIdxx; currx += cellSize)
+			for(curry = minIdxy; curry <= maxIdxy; curry += cellSize)
+			{
+				
+				cell = map[hash(currx, curry)];
+				
+				for(IAreaChunk chunk : cell.keySet())
+				{
+					object = cell.get(chunk);
+					objectArea = (AABB) object.getArea();
+					if(objectArea.getPassId() == passId)
+						continue;
+					
+//					double distanceSquare = FastMath.powOf2(x - chunk.getX()) + FastMath.powOf2(y - chunk.getY());
+					
+//					System.out.println(aabb.r+radius + " : " + Math.sqrt(distanceSquare));
+					
+					// TODO: make it strictier:
+					
+					if(objectArea.overlaps( minx, miny, maxx, maxy ))
+						if(sensor.objectFound(object))
+							break;
+					
+					objectArea.setPassId( passId );
+				}
+			}
+		
+		return sensor;
+
+	}
 
 	protected final int getNextPassId()
 	{
@@ -208,7 +262,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
+	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
 	{
 		// TODO: spiral iteration, remove this root calculation:
 		double radius = Math.sqrt(radiusSquare);
@@ -258,7 +312,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	}
 	
 	@Override
-	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
+	public final ISpatialSensor <O> queryLine(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
 	{
 		int currGridx = toGridIndex(ox);
 		int currGridy = toGridIndex(oy);
@@ -295,6 +349,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		}
 		else { tMaxY = Double.MAX_VALUE; tDeltaY = 0; stepY = 0;}
 		
+		// marks entity area to avoid reporting entity multiple times
 		int passId = getNextPassId();
 		O object;
 		Map <IAreaChunk, O> cell;

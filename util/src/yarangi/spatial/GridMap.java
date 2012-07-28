@@ -486,7 +486,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		return sensor;
 	}
 
-	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
+	public final ISpatialSensor <O> queryLine(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
 	{
 		int currGridx = toGridXIndex(ox);
 		int currGridy = toGridYIndex(oy);

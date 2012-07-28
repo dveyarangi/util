@@ -27,7 +27,7 @@ public interface ISpatialIndex <O>
 	 * @param maxx
 	 * @param maxy
 	 */
-	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare);
+	public ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radiusSquare);
 	
 	/**
 	 * Iterates over a line, originating at (ox, oy) width (dx, dy) length
@@ -39,6 +39,9 @@ public interface ISpatialIndex <O>
 	 * @param dy
 	 * @return
 	 */
-	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy);
+	public ISpatialSensor <O> queryLine(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy);
+	
+	
+	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double dx, double dy);
 
 }
