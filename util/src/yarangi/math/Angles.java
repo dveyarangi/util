@@ -17,6 +17,21 @@ public class Angles
 	public static final double TO_RAD = PI/180.;
 	public static final double TO_DEG = 180./PI;
 	
+	
+	public static final double [] SIN = new double [720];
+	public static final double [] COS = new double [720];
+	
+	static {
+		double step = PI_2 / SIN.length;
+		double angle = 0;
+		for(int idx = 0; idx < SIN.length; idx ++)
+		{
+			SIN[idx] = Math.sin( angle );
+			COS[idx] = Math.cos( angle );
+			angle += step;
+		}
+	}
+	
 	public static double toRadians(double degrees)
 	{
 		return degrees*TO_RAD;
@@ -81,4 +96,6 @@ public class Angles
 		
 		return normalize(oldAngle + dir * step);
 	}
+	
+	
 }
