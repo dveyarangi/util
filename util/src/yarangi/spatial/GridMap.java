@@ -437,26 +437,46 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	}
 	
 		
-	/**
-	 * {@inheritDoc}
-	 * TODO: slow
-	 */
-	public ISpatialSensor <O> query(ISpatialSensor <O> sensor, Area area)
+	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
 	{
-		if(area == null)
-			throw new IllegalArgumentException("Area cannot be null.");
-
-		queryingConsumer.setSensor( sensor );
-		queryingConsumer.setQueryId(createNextQueryId());
-		area.iterate( cellSize, queryingConsumer );
-
-		return sensor;
+		return queryAABB( sensor, aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY() );
 	}
+	
+	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double rx, double ry)
+	{
+
+		int minIdxx = Math.max(toGridXIndex(cx-rx), 0);
+		int minIdxy = Math.max(toGridYIndex(cy-ry), 0);
+		int maxIdxx = Math.min(toGridXIndex(cx+rx), gridWidth);
+		int maxIdxy = Math.min(toGridYIndex(cy+ry), gridHeight);		
+		int tx, ty;
+		
+		T tile;
+		
+		int passId = createNextQueryId();
+	
+		for(tx = minIdxx; tx <= maxIdxx; tx ++)
+			for(ty = minIdxy; ty <= maxIdxy; ty ++)
+			{
+				
+				tile = getTileByIndex(tx, ty);
+
+				if(tile != null)
+				{
+					if(tile.query(sensor, passId))
+						return sensor;
+				}
+			}
+		
+		return sensor;
+
+	}
+
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public final ISpatialSensor <O> query(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
+	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
 	{
 		// TODO: spiral iteration, remove this root calculation:
 		double radius = Math.sqrt(radiusSquare);

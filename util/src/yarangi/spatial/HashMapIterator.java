@@ -29,7 +29,7 @@ final class HashMapIterator <T extends ISpatialObject> implements Iterator <T>
 	/**
 	 * Iterator over current cell.
 	 */
-	protected Iterator <IAreaChunk> bucketIterator;
+	protected Iterator <T> bucketIterator;
 	
 	/**
 	 * Next object.
@@ -39,7 +39,7 @@ final class HashMapIterator <T extends ISpatialObject> implements Iterator <T>
 	/**
 	 * Bounding box of the next object.
 	 */
-	protected IAreaChunk chunk;
+	protected T chunk;
 	
 	public HashMapIterator(double minx, double miny, double maxx, double maxy, SpatialHashMap<T> map) 
 	{
@@ -56,13 +56,14 @@ final class HashMapIterator <T extends ISpatialObject> implements Iterator <T>
 		xIdx = xmin; yIdx = ymin;
 		
 		// pre-selecting next object:
-		bucketIterator = map.getBucket(xIdx,yIdx).keySet().iterator();
+		bucketIterator = map.getBucket(xIdx,yIdx).iterator();
 		next = _next();
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public T next()
 	{
 		if(next == null)
@@ -93,15 +94,15 @@ final class HashMapIterator <T extends ISpatialObject> implements Iterator <T>
 				}
 				
 				// selecting new bucket iterator:
-				bucketIterator = map.getBucket(xIdx,yIdx).keySet().iterator();
+				bucketIterator = map.getBucket(xIdx,yIdx).iterator();
 			}
 			
 			while(bucketIterator.hasNext())
 			{
 				chunk = bucketIterator.next();
 				// searching for fitting object: 
-				if(chunk.overlaps(minx, miny, maxx, maxy))
-					return map.getBucket(xIdx,yIdx).get(chunk);
+//				if(chunk.overlaps(minx, miny, maxx, maxy))
+					return chunk;
 			}
 			
 		}
@@ -111,11 +112,13 @@ final class HashMapIterator <T extends ISpatialObject> implements Iterator <T>
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean hasNext() { return next != null;	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void remove() { bucketIterator.remove(); }
 	
 }

@@ -95,17 +95,11 @@ public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpat
 	protected abstract K removeObject(Area area, K object);
 	
 	/**
-	 * Updates an {@link AABB} box location.
+	 * Updates an {@link AABB} box, containing the object.
 	 * @param aabb
 	 * @param object
 	 */
 	protected abstract void updateObject(Area old, Area area, K object);
 
-	
-	/**
-	 * Updates an {@link AABB} box location.
-	 * @param aabb
-	 * @param object
-	 */
 
 }

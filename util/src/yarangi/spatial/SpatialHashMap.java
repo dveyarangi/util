@@ -1,7 +1,7 @@
 package yarangi.spatial;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import yarangi.math.FastMath;
 
@@ -18,7 +18,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * buckets array.
 	 * TODO: hashmap is slow!!!
 	 */
-	protected Map <IAreaChunk, O> [] map;
+	protected Set <O> [] map;
 	
 	/**
 	 * number of buckets
@@ -74,9 +74,9 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		this.halfGridWidth = width/2/cellSize;
 		this.halfGridHeight = height/2/cellSize;
 		this.halfCellSize = cellSize/2.;
-		map = new Map [size];
+		map = new Set[size];
 		for(int idx = 0; idx < size; idx ++)
-			map[idx] = new HashMap <IAreaChunk, O> ();
+			map[idx] = new HashSet <O> ();
 //		System.out.println(halfWidth + " : " + halfHeight);
 	}
 	
@@ -114,7 +114,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * @param y
 	 * @return
 	 */
-	public final Map <IAreaChunk, O> getBucket(int x, int y)
+	public final Set <O> getBucket(int x, int y)
 	{
 		return map[hash(x, y)];
 	}
@@ -144,8 +144,9 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	{
 		if(object == null)
 			throw new NullPointerException();
-		addingConsumer.setObject( object );
-		area.iterate( cellSize, addingConsumer );
+
+		AABB aabb = (AABB) area;
+		iterateOverAABB( aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY(), 1, null, object );
 	}
 
 	/**
@@ -154,8 +155,8 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	@Override
 	protected O removeObject(Area area, O object) 
 	{
-		removingConsumer.setObject( object );
-		area.iterate( cellSize, removingConsumer );
+		AABB aabb = (AABB) area;
+		iterateOverAABB( aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY(), 2, null, object );
 		
 		return object;
 	}
@@ -188,6 +189,63 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		return sensor;
 	}*/
 	
+	public int iterateOverAABB( double cx, double cy, double rx, double ry, int odeToJava, ISpatialSensor <O> sensor, O object)
+	{
+		double minx = cx - rx;
+		double miny = cy - ry;
+		double maxx = cx + rx;
+		double maxy = cy + ry;
+		
+		int minIdxx = Math.max(toGridIndex(cx-rx), -halfGridWidth);
+		int minIdxy = Math.max(toGridIndex(cy-ry), -halfGridHeight);
+		int maxIdxx = Math.min(toGridIndex(cx+rx),  halfGridWidth);
+		int maxIdxy = Math.min(toGridIndex(cy+ry),  halfGridHeight);
+		
+		int currx, curry;
+		int passId = getNextPassId();
+		int hash;
+		
+		Set <O> cell;
+		AABB objectArea;
+		
+		found: for(currx = minIdxx; currx <= maxIdxx; currx ++)
+			for(curry = minIdxy; curry <= maxIdxy; curry ++)
+			{
+//				System.out.println(minx + " " + miny + " " + maxx + " " + maxy);
+				hash = hash(currx, curry);
+				
+				if(hash < 0)
+					continue;
+				cell = map[hash];
+				if(odeToJava == 1) {
+					cell.add(object);
+					
+				} else
+				if(odeToJava == 2) {
+						cell.remove( object );
+				}
+				if(odeToJava == 0) {
+				
+				for(O obj : cell)
+				{
+
+					if(!(obj.getArea() instanceof AABB))
+						continue; // TODO: too silent.
+					
+					objectArea = (AABB) obj.getArea();
+					if(objectArea.getPassId() == passId)
+						continue;
+					if(objectArea.overlaps( minx, miny, maxx, maxy ))
+						if(sensor.objectFound(obj))
+							break found;
+					objectArea.setPassId( passId );
+					}			
+				}
+			}
+		
+		return -338;
+	}
+	
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
 	{
 		return queryAABB( sensor, aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY() );
@@ -195,49 +253,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	@Override
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double rx, double ry)
 	{
-		double minx = cx - rx;
-		double miny = cy - ry;
-		double maxx = cx + rx;
-		double maxy = cy + ry;
-		int minIdxx = (int)Math.floor( minx/cellSize ) * cellSize;
-		int minIdxy = (int)Math.floor( miny/cellSize ) * cellSize;
-		
-		int maxIdxx = (int)Math.ceil(  maxx/cellSize ) * cellSize;
-		int maxIdxy = (int)Math.ceil(  maxy/cellSize ) * cellSize;
-		
-		int currx, curry;
-		int passId = getNextPassId();
-		O object;
-		
-		Map <IAreaChunk, O> cell;
-		AABB objectArea;
-		
-		for(currx = minIdxx; currx <= maxIdxx; currx += cellSize)
-			for(curry = minIdxy; curry <= maxIdxy; curry += cellSize)
-			{
-				
-				cell = map[hash(currx, curry)];
-				
-				for(IAreaChunk chunk : cell.keySet())
-				{
-					object = cell.get(chunk);
-					objectArea = (AABB) object.getArea();
-					if(objectArea.getPassId() == passId)
-						continue;
-					
-//					double distanceSquare = FastMath.powOf2(x - chunk.getX()) + FastMath.powOf2(y - chunk.getY());
-					
-//					System.out.println(aabb.r+radius + " : " + Math.sqrt(distanceSquare));
-					
-					// TODO: make it strictier:
-					
-					if(objectArea.overlaps( minx, miny, maxx, maxy ))
-						if(sensor.objectFound(object))
-							break;
-					
-					objectArea.setPassId( passId );
-				}
-			}
+		iterateOverAABB( cx, cy, rx, ry, 0, sensor, null );
 		
 		return sensor;
 
@@ -271,11 +287,11 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		int maxx = Math.min(toGridIndex(x+radius),  halfGridWidth);
 		int maxy = Math.min(toGridIndex(y+radius),  halfGridHeight);
 		int passId = getNextPassId();
-		O object;
+//		O object;
 		
 //		System.out.println("dim: " + minx + " " + maxx + " " + miny + " " + maxy + "area size: " + (maxx-minx)*(maxy-miny));
 		// removing the object from all overlapping buckets:
-		Map <IAreaChunk, O> cell;
+		Set <O> cell;
 		for(int tx = minx; tx <= maxx; tx ++)
 			for(int ty = miny; ty <= maxy; ty ++)
 			{
@@ -288,9 +304,8 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 //				System.out.println(aabb.r+radius + " : " + Math.sqrt(distanceSquare));
 				
 				// TODO: make it strictier:
-				for(IAreaChunk chunk : cell.keySet())
+				for(O object : cell)
 				{
-					object = cell.get(chunk);
 					if(object.getArea().getPassId() == passId)
 						continue;
 					
@@ -351,8 +366,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		
 		// marks entity area to avoid reporting entity multiple times
 		int passId = getNextPassId();
-		O object;
-		Map <IAreaChunk, O> cell;
+		Set <O> cell;
 		while(tMaxX <= 1 || tMaxY <= 1)
 		{
 			if(tMaxX < tMaxY)
@@ -366,14 +380,15 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 				currGridy += stepY;
 			}
 			cell = map[hash(currGridx, currGridy)];
-			for(IAreaChunk chunk : cell.keySet())
+			for(O object : cell)
 			{
-				object =  cell.get(chunk);
 				if(object.getArea().getPassId() == passId)
 					continue;
-				if(toGridIndex(chunk.getX()) == currGridx && toGridIndex(chunk.getY()) == currGridy)
-				if(sensor.objectFound(cell.get(chunk)))
-					break;
+				
+				AABB aabb = (AABB) object.getArea();
+				if(aabb.crosses(ox, oy, dx, dy))
+					if(sensor.objectFound(object))
+						break;
 				
 				object.getArea().setPassId( passId );
 			}	
@@ -387,116 +402,6 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 		public void setObject(T object);
 	}
 	
-	private final IObjectConsumer <O> addingConsumer = new IObjectConsumer <O>()
-	{
-		private O object;
-		private int x, y;
-		
-		@Override
-		public void setObject(O object)
-		{
-			this.object = object;
-		}
-		@Override
-		public boolean consume(IAreaChunk chunk)
-		{
-			x = toGridIndex(chunk.getX()); 
-			y = toGridIndex(chunk.getY());
-			
-			if(isInvalidIndex(x, y)) 
-				return false;
-			
-			map[hash(x, y)].put(chunk, object);
-			return false;
-		}
-	};
-	
-	private final IObjectConsumer <O> removingConsumer = new IObjectConsumer <O>()
-	{
-		private O object;
-		private int x, y;
-		
-		@Override
-		public void setObject(O object)
-		{
-			this.object = object;
-		}
-		
-		@Override
-		public boolean consume(IAreaChunk chunk)
-		{
-			x = toGridIndex(chunk.getX()); 
-			y = toGridIndex(chunk.getY());
-			
-			if(isInvalidIndex(x, y)) 
-				return false;
-			
-			if(map[hash(x, y)].remove(chunk) == null)
-			{
-//				for(IAreaChunk ch : map[hash(x,y)].keySet())
-//					System.out.println(ch.getArea() + " :: " + chunk.getArea());
-//				throw new IllegalArgumentException("Bucket (loc:[" + x + "," + y + "]; size:" + map[hash(x, y)].size() + ") does not contain object (obj:" + object + ").");
-			}
-			return false;
-		}
-	};
-	private interface IQueryingConsumer <T extends ISpatialObject> extends IChunkConsumer
-	{
-		public void setSensor(ISpatialSensor <T> sensor);
 
-		public void setQueryId(int nextPassId);
-	}
-	
-	private final IQueryingConsumer <O> queryingConsumer = new IQueryingConsumer <O>()
-	{
-		private O object;
-		private int x, y;
-		private Map <IAreaChunk, O> cell;
-		private ISpatialSensor <O> processor;
-		private int passId;
-		
-		@Override
-		public void setSensor(ISpatialSensor <O> processor)
-		{
-			this.processor = processor;
-		}
-		
-		@Override
-		public void setQueryId(int passId)
-		{
-			this.passId = passId;
-		}
-
-		@Override
-		public boolean consume(IAreaChunk chunk)
-		{
-			x = toGridIndex(chunk.getX()); 
-			y = toGridIndex(chunk.getY());
-			
-			if(isInvalidIndex(x, y)) 
-				return false;
-			
-			boolean terminate = false;
-			cell = map[hash(x, y)];
-			for(IAreaChunk c : cell.keySet())
-			{
-				object = cell.get(c);
-				if(object.getArea().getPassId() == passId)
-					continue;
-				
-				if(chunk.overlaps(c.getMinX(), c.getMinY(), c.getMaxX(), c.getMaxY()))
-//					System.out.println(cell.get(c));
-				{
-					object.getArea().setPassId( passId );
-					terminate = processor.objectFound(object);
-					if(terminate)
-						return true;
-					
-				}
-			}
-			
-			return false;
-		}
-	};
 
 }

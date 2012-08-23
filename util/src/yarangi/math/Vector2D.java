@@ -3,6 +3,7 @@ package yarangi.math;
 /**
  * Implementation of bi-dimensional vector.
  * TODO: compile vector math expressions?
+ * TODO: vector pool
 
  * @author Dve Yarangi
  * 
@@ -358,6 +359,7 @@ public class Vector2D //extends IVector2D
 	 */
 	public int size() { return 2; }
 	
+	@Override
 	public boolean equals(Object o)
 	{
 		if(!(o instanceof IVector2D))
@@ -370,6 +372,7 @@ public class Vector2D //extends IVector2D
 	/**
 	 * @return display string representation of this vector
 	 */
+	@Override
 	public String toString() 
 	{ 
 		return new StringBuilder()
@@ -378,6 +381,7 @@ public class Vector2D //extends IVector2D
 	}
 	
 	// TODO: make it faster
+	@Override
 	public int hashCode()
 	{
 		return new Double(x).hashCode() + new Double(y).hashCode();

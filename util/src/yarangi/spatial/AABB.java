@@ -236,5 +236,10 @@ public class AABB implements Area
 
 	@Override
 	public final void setPassId(int id) {	this.passId = id; }
+	public boolean crosses(double ox, double oy, double dx, double dy)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }

@@ -26,7 +26,12 @@ public class RandomUtil
 	{
 		return mean + sigma * (float)random.nextGaussian();
 	} 
-	public static double STD(double mean, double sigma)
+	/**
+	 * Normal distribution around mean
+	 * @param mean
+	 * @param sigma
+	 * @return
+	 */	public static double STD(double mean, double sigma)
 	{
 		return mean + sigma * random.nextGaussian();
 	} 

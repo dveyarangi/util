@@ -17,19 +17,37 @@ public class Angles
 	public static final double TO_RAD = PI/180.;
 	public static final double TO_DEG = 180./PI;
 	
+	public static final int FINESSE = 720;
 	
-	public static final double [] SIN = new double [720];
-	public static final double [] COS = new double [720];
+	private static final double [] SIN = new double [FINESSE];
+	private static final double [] COS = new double [FINESSE];
 	
+	public final static double TRIG_STEP = PI_2 / FINESSE;
+	public final static double INV_TRIG_STEP = FINESSE / PI_2;
 	static {
-		double step = PI_2 / SIN.length;
 		double angle = 0;
-		for(int idx = 0; idx < SIN.length; idx ++)
+		for(int idx = 0; idx < FINESSE; idx ++)
 		{
 			SIN[idx] = Math.sin( angle );
 			COS[idx] = Math.cos( angle );
-			angle += step;
+			angle += TRIG_STEP;
 		}
+	}
+	
+	public static double SIN(double angle) {
+		if(angle < 0)
+			angle += PI_2;
+		return SIN[toTrigoIndex( angle ) % FINESSE];
+	}
+	
+	public static double COS(double angle) {
+		if(angle < 0)
+			angle += PI_2;
+		return COS[toTrigoIndex( angle ) % FINESSE];
+	}
+	
+	private final static int toTrigoIndex(double angle) {
+		return (int) Math.round( angle * INV_TRIG_STEP );
 	}
 	
 	public static double toRadians(double degrees)

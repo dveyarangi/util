@@ -40,10 +40,10 @@
 
 package com.seisw.util.geom;
 
-import java.awt.geom.Point2D ;
-import java.awt.geom.Rectangle2D ;
-import java.util.ArrayList ;
-import java.util.List ;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <code>Clip</code> is a Java version of the <i>General Poly Clipper</i> algorithm
@@ -1432,7 +1432,7 @@ public class Clip
    // ---------------------
    private static class OperationType
    {
-      private String m_Type ;
+      private final String m_Type ;
       private OperationType( String type ) { m_Type = type; }
       
       public static final OperationType GPC_DIFF  = new OperationType( "Difference" );
@@ -1440,7 +1440,8 @@ public class Clip
       public static final OperationType GPC_XOR   = new OperationType( "Exclusive or" );
       public static final OperationType GPC_UNION = new OperationType( "Union" );
       
-      public String toString() { return m_Type; }
+      @Override
+	public String toString() { return m_Type; }
    }
 
    /**
@@ -1496,14 +1497,15 @@ public class Clip
     */
    private static class BundleState
    {
-      private String m_State ;
+      private final String m_State ;
       private BundleState( String state ) { m_State = state ; }
       
       public static final BundleState UNBUNDLED   = new BundleState( "UNBUNDLED"   ); // Isolated edge not within a bundle
       public static final BundleState BUNDLE_HEAD = new BundleState( "BUNDLE_HEAD" ); // Bundle head node
       public static final BundleState BUNDLE_TAIL = new BundleState( "BUNDLE_TAIL" ); // Passive bundle tail node
       
-      public String toString() { return m_State; }
+      @Override
+	public String toString() { return m_State; }
    }
 
    /**
@@ -1789,7 +1791,7 @@ public class Clip
    
    private static class EdgeTable
    {
-      private List m_List = new ArrayList();
+      private final List m_List = new ArrayList();
    
       public void addNode( double x, double y )
       {
