@@ -3,6 +3,7 @@ package yarangi.spatial;
 import java.util.List;
 
 import yarangi.Zen;
+import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
 /**
@@ -32,7 +33,7 @@ public interface Area
 	 * and replace with cloned vector.
 	 * @return
 	 */
-	public Vector2D getAnchor();
+	public IVector2D getAnchor();
 	
 	/**
 	 * Translates area reference point by specified amount. 
@@ -40,6 +41,12 @@ public interface Area
 	 * @param dy
 	 */
 	public void translate(double dx, double dy);
+	/**
+	 * Translates area reference point to specified location. 
+	 * @param dx
+	 * @param dy
+	 */
+	public void move(double dx, double dy);
 	
 	/**
 	 * Scales the area to fit specified maximum radius.
@@ -70,7 +77,7 @@ public interface Area
 	 * @param from
 	 * @return
 	 */
-	public List <Vector2D> getDarkEdge(Vector2D from);
+	public List <IVector2D> getDarkEdge(Vector2D from);
 
 	/**
 	 * Area profile width from specified angle.
@@ -138,6 +145,7 @@ public interface Area
 		@Override
 		public Vector2D getAnchor() { return Zen.notSupported(); }
 
+		@Override
 		public double getMaxRadius() { return Zen.notSupported();  }
 
 		@Override
@@ -145,10 +153,11 @@ public interface Area
 		@Override
 		public void fitTo(double radius) { Zen.notSupported(); }
 
+		@Override
 		public Area clone() { return this; }
 
 		@Override
-		public List <Vector2D> getDarkEdge(Vector2D from)
+		public List <IVector2D> getDarkEdge(Vector2D from)
 		{
 			return Zen.notSupported();
 		}
@@ -161,6 +170,12 @@ public interface Area
 
 		@Override
 		public boolean overlaps(AABB area) { return false; }
+
+		@Override
+		public void move(double dx, double dy)
+		{
+			Zen.notSupported();
+		}
 	
 	};
 

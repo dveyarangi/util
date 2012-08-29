@@ -4,12 +4,13 @@ import java.util.List;
 
 import yarangi.Zen;
 import yarangi.math.FastMath;
+import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
 public class CircleArea implements Area
 {
 	
-	private Vector2D center;
+	private final Vector2D center;
 	
 	private double radius;
 	
@@ -29,11 +30,18 @@ public class CircleArea implements Area
 	public void setOrientation(double a) { }
 
 	@Override
-	public Vector2D getAnchor() { return center; }
+	public IVector2D getAnchor() { return center; }
 
 	@Override
 	public void translate(double dx, double dy) { center.add( dx, dy ); }
-
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void move(double x, double y) {
+		center.setxy( x, y );
+	}
+	
 	@Override
 	public void fitTo(double radius) { this.radius = radius; }
 
@@ -68,11 +76,12 @@ public class CircleArea implements Area
 	}
 
 	@Override
-	public List<Vector2D> getDarkEdge(Vector2D from)
+	public List<IVector2D> getDarkEdge(Vector2D from)
 	{
 		return null;
 	}
 
+	@Override
 	public Area clone()
 	{
 		return new CircleArea( center.x(), center.y(), radius );

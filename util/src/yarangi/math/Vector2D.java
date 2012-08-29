@@ -8,7 +8,7 @@ package yarangi.math;
  * @author Dve Yarangi
  * 
  */
-public class Vector2D //extends IVector2D
+public class Vector2D implements IVector2D
 {
 	private static final long serialVersionUID = 3043592649139743124L;
 	
@@ -104,10 +104,10 @@ public class Vector2D //extends IVector2D
 	 * @param x
 	 * @param y
 	 */
-	public static Vector2D COPY(Vector2D v) 
+	public static Vector2D COPY(IVector2D v) 
 	{
 		count ++;
-		return new Vector2D(v.x, v.y);
+		return new Vector2D(v.x(), v.y());
 	}
 
 	/**
@@ -126,11 +126,13 @@ public class Vector2D //extends IVector2D
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	final public double x() { return x; }
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	final public double y() { return y; }
 	
 	final public void setx(double x) { this.x = x; }
@@ -143,6 +145,7 @@ public class Vector2D //extends IVector2D
 	 * Calculates vector length.
 	 * @return
 	 */
+	@Override
 	final public double abs() { return Math.hypot(x, y); }
 
 	final public double absSquare()
@@ -222,10 +225,10 @@ public class Vector2D //extends IVector2D
 	 * @param v
 	 * @return
 	 */
-	final public Vector2D add(Vector2D v)
+	final public Vector2D add(IVector2D v)
 	{
-		this.x += v.x;
-		this.y += v.y;
+		this.x += v.x();
+		this.y += v.y();
 		
 		return this;
 	}
@@ -244,12 +247,13 @@ public class Vector2D //extends IVector2D
 	
 	/**
 	 * Calculates vector difference
-	 * @param v
+	 * @param iVector2D
 	 * @return
 	 */
-	final public Vector2D minus(Vector2D v)
+	@Override
+	final public Vector2D minus(IVector2D vector2D)
 	{
-		return new Vector2D(x-v.x, y-v.y);
+		return new Vector2D(x-vector2D.x(), y-vector2D.y());
 	}
 	/**
 	 * Calculates vector difference
@@ -265,10 +269,10 @@ public class Vector2D //extends IVector2D
 	 * <li>Note: this operation changes current vector
 	 * @param v
 	 */
-	final public Vector2D substract(Vector2D v)
+	final public Vector2D substract(IVector2D v)
 	{
-		this.x -= v.x;
-		this.y -= v.y;
+		this.x -= v.x();
+		this.y -= v.y();
 		
 		return this;
 	}
@@ -340,6 +344,7 @@ public class Vector2D //extends IVector2D
 	/**
 	 * @return New vector, rotated by 90 counter-clockwise
 	 */
+	@Override
 	final public Vector2D left() { return new Vector2D(-y, x); }
 	
 	/**

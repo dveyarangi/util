@@ -7,14 +7,15 @@ import java.util.List;
 import yarangi.Zen;
 import yarangi.math.FastArrays;
 import yarangi.math.FastMath;
+import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
 public class PolygonArea implements Area 
 {
-	private List <PolyPoint> points = new ArrayList <PolyPoint> ();
+	private final List <PolyPoint> points = new ArrayList <PolyPoint> ();
 	
 	
-	private Vector2D ref;
+	private final Vector2D ref;
 	
 	private PolyPoint maxx, maxy, minx, miny;
 	
@@ -81,13 +82,14 @@ public class PolygonArea implements Area
 	
 	public PolyPoint get(int idx) { return this.points.get(idx); }
 	
+	@Override
 	public PolygonArea clone()
 	{
 		return new PolygonArea(this);
 	}
 
 
-	@Override public Vector2D getAnchor() { return ref; }
+	@Override public IVector2D getAnchor() { return ref; }
 
 	@Override
 	public double getOrientation() { return 0; }
@@ -107,7 +109,14 @@ public class PolygonArea implements Area
 	public void translate(double dx, double dy) {
 		ref.add(dx, dy);
 	}
-	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void move(double x, double y) {
+		ref.setxy( x, y );
+	}
+		
 
 	@Override
 	public void iterate(int cellsize, IChunkConsumer consumer)
@@ -285,12 +294,12 @@ public class PolygonArea implements Area
 	 */
 	public class PolyChunk implements IAreaChunk
 	{
-		private int x, y;
+		private final int x, y;
 		
 		private List <Vector2D> pieces;
 		
-		private int minIdx;
-		private int maxIdx;
+		private final int minIdx;
+		private final int maxIdx;
 		public PolyChunk(int x, int y, int minIdx, int maxIdx) 
 		{
 			
@@ -352,6 +361,7 @@ public class PolygonArea implements Area
 			return true;
 		}
 		
+		@Override
 		public String toString()
 		{
 			return "Polychunk at [" + x + "," + y + "], idx[" + minIdx + ":" + maxIdx + "].";
@@ -365,9 +375,9 @@ public class PolygonArea implements Area
 	}
 
 	@Override
-	public List<Vector2D> getDarkEdge(Vector2D from)
+	public List<IVector2D> getDarkEdge(Vector2D from)
 	{
-		List <Vector2D> res = new ArrayList <Vector2D> ();
+		List <IVector2D> res = new ArrayList <IVector2D> ();
 
 		Vector2D minPoint = null;
 		Vector2D maxPoint = null;

@@ -9,7 +9,7 @@ public class Geometry
 	 * @param v2
 	 * @return
 	 */
-	public static double calcHypotSquare(Vector2D v1, Vector2D v2)
+	public static double calcHypotSquare(IVector2D v1, IVector2D v2)
 	{
 		return calcHypotSquare(v1.x(), v1.y(), v2.x(), v2.y());
 	}
@@ -21,7 +21,7 @@ public class Geometry
 		return dx*dx + dy*dy;
 	}
 	
-	public static double calcHypot(Vector2D v1, Vector2D v2)
+	public static double calcHypot(IVector2D v1, IVector2D v2)
 	{
 		return calcHypot(v1.x(), v1.y(), v2.x(), v2.y());
 	}
@@ -39,7 +39,7 @@ public class Geometry
 	 * @param d line direction
 	 * @return
 	 */
-	public static double calcDistanceToLine(Vector2D P, Vector2D Q, Vector2D v)
+	public static double calcDistanceToLine(IVector2D P, IVector2D Q, IVector2D v)
 	{
 		return P.minus(Q).abs() / v.left().abs();
 	}

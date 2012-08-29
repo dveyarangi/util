@@ -1,11 +1,11 @@
 package yarangi.math;
 
 /**
- * Abstract for bi-dimensional vector
+ * Abstract for immutable bi-dimensional vector
  * 
  * @author Dve Yarangi
  */
-public abstract class IVector2D implements IVector 
+public interface IVector2D
 {
 	/**
 	 * @return Abscissa value.
@@ -16,9 +16,11 @@ public abstract class IVector2D implements IVector
 	 * @return Ordinate value
 	 */
 	public abstract double y();
-	
-	/**
-	 * {@inheritDoc} - 2, obviously.
-	 */
-	public int size() { return 2; }
+
+	public Vector2D minus(IVector2D vec);
+
+	public abstract Vector2D left();
+
+	public abstract double abs();
+
 }

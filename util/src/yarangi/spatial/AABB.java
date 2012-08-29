@@ -3,6 +3,7 @@ package yarangi.spatial;
 import java.util.ArrayList;
 import java.util.List;
 
+import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
 /**
@@ -95,7 +96,7 @@ public class AABB implements Area
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final Vector2D getAnchor() { return ref; }
+	public final IVector2D getAnchor() { return ref; }
 
 	/**
 	 * {@inheritDoc}
@@ -110,6 +111,15 @@ public class AABB implements Area
 	final public void translate(double dx, double dy) {
 		ref.add(dx, dy);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void move(double x, double y) {
+		ref.setxy( x, y );
+	}
+	
 
 	/**
 	 * {@inheritDoc}
@@ -155,11 +165,13 @@ public class AABB implements Area
 	}
 
 	@Override
-	public List<Vector2D> getDarkEdge(Vector2D from)
+	public List<IVector2D> getDarkEdge(Vector2D from)
 	{
-		List <Vector2D> res = new ArrayList <Vector2D> (2);
+		
+		// TODO: OPTIMIZE vector allocation
+		List <IVector2D> res = new ArrayList <IVector2D> (2);
 		//			System.out.println(entities.size());
-		Vector2D distance = getAnchor().minus(from).normalize().multiply(getMaxRadius());
+		Vector2D distance = ref.minus(from).normalize().multiply(getMaxRadius());
 
 		res.add(distance.left() .add(ref).substract(from));
 		res.add(distance.right().add(ref).substract(from));

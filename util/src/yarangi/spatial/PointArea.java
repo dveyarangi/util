@@ -3,6 +3,7 @@ package yarangi.spatial;
 import java.util.LinkedList;
 
 import yarangi.Zen;
+import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
 /**
@@ -12,7 +13,7 @@ import yarangi.math.Vector2D;
  */
 public class PointArea implements Area 
 {
-	private Vector2D ref;
+	private final Vector2D ref;
 	
 	private int passId;
 	
@@ -42,6 +43,7 @@ public class PointArea implements Area
 		return 0;
 	}
 
+	@Override
 	public double getMaxRadius() { return 0; }
 
 	@Override
@@ -52,7 +54,7 @@ public class PointArea implements Area
 
 
 	@Override
-	public Vector2D getAnchor() {
+	public IVector2D getAnchor() {
 		return ref;
 	}
 
@@ -61,17 +63,25 @@ public class PointArea implements Area
 	{
 		ref.add(dx, dy);
 	}
+	
+	@Override
+	public void move(double x, double y) {
+		ref.setxy( x, y );
+	}
+	
 	@Override
 	public void fitTo(double radius)
 	{
 		Zen.notSupported();
 	}
 	
+	@Override
 	public Area clone()
 	{
 		return new PointArea(ref);
 	}
 	
+	@Override
 	public String toString()
 	{
 		return new StringBuilder()
@@ -81,7 +91,7 @@ public class PointArea implements Area
 	
 	class PointChunk implements IAreaChunk
 	{
-		private Vector2D ref;
+		private final Vector2D ref;
 
 		public PointChunk(Vector2D ref)
 		{
@@ -114,6 +124,7 @@ public class PointArea implements Area
 		@Override
 		public double getMaxY() { return getY(); }
 		
+		@Override
 		public boolean equals(Object o)
 		{
 			if(!(o instanceof PointChunk))
@@ -123,14 +134,15 @@ public class PointArea implements Area
 			return this.getArea().equals(chunk.getArea());
 		}
 		
+		@Override
 		public int hashCode() { return this.getArea().hashCode(); }
 		
 	}
 
 	@Override
-	public LinkedList<Vector2D> getDarkEdge(Vector2D from)
+	public LinkedList<IVector2D> getDarkEdge(Vector2D from)
 	{
-		return new LinkedList <Vector2D> ();
+		return new LinkedList <IVector2D> ();
 	}
 
 
