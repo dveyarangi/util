@@ -43,6 +43,7 @@ package com.seisw.util.geom;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -60,6 +61,9 @@ import java.util.List;
  * <strong>Implementation Note:</strong> The converted algorithm does support the <i>difference</i>
  * operation, but a public method has not been provided and it has not been tested.  To do so,
  * simply follow what has been done for <i>intersection</i>.
+ * 
+ * TODO: new EdgeNode is bottleneck
+ * TODO: getResult is bottlneck
  *
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
@@ -82,6 +86,9 @@ public class Clip
    private static final int CLIP = 0 ;
    private static final int SUBJ = 1 ;
    
+   private final List <EdgeNode> edgeNodesPool = new LinkedList <EdgeNode> ();
+   
+   
    // ------------------------
    // --- Member Variables ---
    // ------------------------
@@ -99,48 +106,6 @@ public class Clip
    // ----------------------
    /**
     * Return the intersection of <code>p1</code> and <code>p2</code> where the
-    * return type is of <code>polyClass</code>.  See the note in the class description
-    * for more on <ocde>polyClass</code>.
-    *
-    * @param p1        One of the polygons to performt he intersection with
-    * @param p2        One of the polygons to performt he intersection with
-    * @param polyClass The type of <code>Poly</code> to return
-    */
-   public static Poly intersection( Poly p1, Poly p2, Class polyClass )
-   {
-      return clip( OperationType.GPC_INT, p1, p2, polyClass );
-   }
-
-   /**
-    * Return the union of <code>p1</code> and <code>p2</code> where the
-    * return type is of <code>polyClass</code>.  See the note in the class description
-    * for more on <ocde>polyClass</code>.
-    *
-    * @param p1        One of the polygons to performt he union with
-    * @param p2        One of the polygons to performt he union with
-    * @param polyClass The type of <code>Poly</code> to return
-    */
-   public static Poly union( Poly p1, Poly p2, Class polyClass )
-   {
-      return clip( OperationType.GPC_UNION, p1, p2, polyClass );
-   }
-   
-   /**
-    * Return the xor of <code>p1</code> and <code>p2</code> where the
-    * return type is of <code>polyClass</code>.  See the note in the class description
-    * for more on <ocde>polyClass</code>.
-    *
-    * @param p1        One of the polygons to performt he xor with
-    * @param p2        One of the polygons to performt he xor with
-    * @param polyClass The type of <code>Poly</code> to return
-    */
-   public static Poly xor( Poly p1, Poly p2, Class polyClass )
-   {
-      return clip( OperationType.GPC_XOR, p1, p2, polyClass );
-   }
-   
-   /**
-    * Return the intersection of <code>p1</code> and <code>p2</code> where the
     * return type is of <code>PolyDefault</code>. 
     *
     * @param p1 One of the polygons to performt he intersection with
@@ -148,7 +113,7 @@ public class Clip
     */
    public static Poly intersection( Poly p1, Poly p2 )
    {
-      return clip( OperationType.GPC_INT, p1, p2, PolyDefault.class );
+      return clip( OperationType.GPC_INT, p1, p2 );
    }
 
    /**
@@ -160,7 +125,7 @@ public class Clip
     */
    public static Poly union( Poly p1, Poly p2 )
    {
-      return clip( OperationType.GPC_UNION, p1, p2, PolyDefault.class );
+      return clip( OperationType.GPC_UNION, p1, p2 );
    }
    
    /**
@@ -172,7 +137,7 @@ public class Clip
     */
    public static Poly xor( Poly p1, Poly p2 )
    {
-      return clip( OperationType.GPC_XOR, p1, p2, PolyDefault.class );
+      return clip( OperationType.GPC_XOR, p1, p2 );
    }
    
    // -----------------------
@@ -182,25 +147,18 @@ public class Clip
    /**
     * Create a new <code>Poly</code> type object using <code>polyClass</code>.
     */
-   private static Poly createNewPoly( Class polyClass )
+   private static Poly createNewPoly(  )
    {
-      try
-      {
-         return (Poly)polyClass.newInstance();
-      }
-      catch( Exception e )
-      {
-         throw new RuntimeException(e);
-      }
+      return new PolyDefault();
    }
 
    /**
     * <code>clip()</code> is the main method of the clipper algorithm.
     * This is where the conversion from really begins.
     */
-   private static Poly clip( OperationType op, Poly subj, Poly clip, Class polyClass )
+   private static Poly clip( OperationType op, Poly subj, Poly clip )
    {
-      Poly result = createNewPoly( polyClass ) ;
+      Poly result = createNewPoly( ) ;
       
       /* Test for trivial NULL result cases */
       if( (subj.isEmpty() && clip.isEmpty()) ||
@@ -815,7 +773,7 @@ public class Clip
       } /* === END OF SCANBEAM PROCESSING ================================== */
       
       /* Generate result polygon from out_poly */
-      result = out_poly.getResult(polyClass);
+      result = out_poly.getResult();
             
       return result ;
    }
@@ -854,6 +812,9 @@ public class Clip
      return box;  
    }
    
+   // TODO: ugly, but efficient:
+   static boolean  [][] o_table = new boolean[2][2] ;
+   
    private static void minimax_test( Poly subj, Poly clip, OperationType op )
    {
       Rectangle2D[] s_bbox = create_contour_bboxes(subj);
@@ -861,9 +822,14 @@ public class Clip
       
       int subj_num_poly = subj.getNumInnerPoly();
       int clip_num_poly = clip.getNumInnerPoly();
-      boolean[][] o_table = new boolean[subj_num_poly][clip_num_poly] ;
+//      boolean[][] o_table = new boolean[subj_num_poly][clip_num_poly] ;
 
       /* Check all subject contour bounding boxes against clip boxes */
+      if(subj_num_poly > o_table.length || clip_num_poly > o_table[0].length) {
+    	  o_table = new boolean[Math.max( o_table.length, subj_num_poly)]
+    			  			   [Math.max( o_table[0].length, clip_num_poly)];
+    	  System.out.println("poly clipper: new o_table size - " + o_table.length + "x" + o_table[0].length);
+      }
       for( int s = 0; s < subj_num_poly; s++ )
       {
          for( int c= 0; c < clip_num_poly ; c++ )
@@ -1669,9 +1635,9 @@ public class Clip
          return nc;
       }
       
-      public Poly getResult( Class polyClass )
+      public Poly getResult( )
       {
-         Poly result = createNewPoly( polyClass );
+         Poly result = createNewPoly( );
          int num_contours = count_contours();
          if (num_contours > 0)
          {
@@ -1685,7 +1651,7 @@ public class Clip
                   Poly poly = result ;
                   if( num_contours > 1 )
                   {
-                     poly = createNewPoly( polyClass );
+                     poly = createNewPoly( );
                   }
                   if( poly_node.proxy.hole )
                   {
@@ -1711,7 +1677,7 @@ public class Clip
             // --- Sort holes to the end of the list ---
             // -----------------------------------------
             Poly orig = result ;
-            result = createNewPoly( polyClass );
+            result = createNewPoly( );
             for( int i = 0 ; i < orig.getNumInnerPoly() ; i++ )
             {
                Poly inner = orig.getInnerPoly(i);
@@ -1754,7 +1720,7 @@ public class Clip
       }         
    }
    
-   private static class EdgeNode
+   static class EdgeNode
    {
       Point2D.Double vertex = new Point2D.Double(); /* Piggy-backed contour vertex data  */
       Point2D.Double bot    = new Point2D.Double(); /* Edge lower (x, y) coordinate      */
@@ -1772,6 +1738,13 @@ public class Clip
       EdgeNode       pred;         /* Edge connected at the lower end   */
       EdgeNode       succ;         /* Edge connected at the upper end   */
       EdgeNode       next_bound;   /* Pointer to next bound in LMT      */
+      
+      private EdgeNode() {}
+      
+      private void reset() {
+    	  vertex.x = 0; vertex.y = 0;
+    	  
+      }
    }
 
    private static class AetTree
@@ -1791,7 +1764,7 @@ public class Clip
    
    private static class EdgeTable
    {
-      private final List m_List = new ArrayList();
+      private final List <EdgeNode>m_List = new ArrayList<EdgeNode>();
    
       public void addNode( double x, double y )
       {
@@ -1803,38 +1776,38 @@ public class Clip
       
       public EdgeNode getNode( int index )
       {
-         return (EdgeNode)m_List.get(index);
+         return m_List.get(index);
       }
       
       public boolean FWD_MIN( int i )
       {
-         EdgeNode prev = (EdgeNode)m_List.get(PREV_INDEX(i, m_List.size()));
-         EdgeNode next = (EdgeNode)m_List.get(NEXT_INDEX(i, m_List.size()));
-         EdgeNode ith  = (EdgeNode)m_List.get(i);
+         EdgeNode prev = m_List.get(PREV_INDEX(i, m_List.size()));
+         EdgeNode next = m_List.get(NEXT_INDEX(i, m_List.size()));
+         EdgeNode ith  = m_List.get(i);
          return ((prev.vertex.getY() >= ith.vertex.getY()) &&
                  (next.vertex.getY() >  ith.vertex.getY()));
       }
 
       public boolean NOT_FMAX( int i )
       {
-         EdgeNode next = (EdgeNode)m_List.get(NEXT_INDEX(i, m_List.size()));
-         EdgeNode ith  = (EdgeNode)m_List.get(i);
+         EdgeNode next = m_List.get(NEXT_INDEX(i, m_List.size()));
+         EdgeNode ith  = m_List.get(i);
          return(next.vertex.getY() > ith.vertex.getY());
       }
 
       public boolean REV_MIN( int i )
       {
-         EdgeNode prev = (EdgeNode)m_List.get(PREV_INDEX(i, m_List.size()));
-         EdgeNode next = (EdgeNode)m_List.get(NEXT_INDEX(i, m_List.size()));
-         EdgeNode ith  = (EdgeNode)m_List.get(i);
+         EdgeNode prev = m_List.get(PREV_INDEX(i, m_List.size()));
+         EdgeNode next = m_List.get(NEXT_INDEX(i, m_List.size()));
+         EdgeNode ith  = m_List.get(i);
          return ((prev.vertex.getY() >  ith.vertex.getY()) &&
                  (next.vertex.getY() >= ith.vertex.getY()));
       }
       
       public boolean NOT_RMAX( int i )
       {
-         EdgeNode prev = (EdgeNode)m_List.get(PREV_INDEX(i, m_List.size()));
-         EdgeNode ith  = (EdgeNode)m_List.get(i);
+         EdgeNode prev = m_List.get(PREV_INDEX(i, m_List.size()));
+         EdgeNode ith  = m_List.get(i);
          return (prev.vertex.getY() > ith.vertex.getY()) ;
       }
    }
@@ -1987,6 +1960,12 @@ public class Clip
          this.prev = prev ;
       }      
    }
+   
+/*   public static releasePoly(PolyDefault poly) {
+	   for(EdgeNode node : poly.m_List) {
+		   
+	   }
+   }*/
    
    // -------------
    // --- DEBUG ---

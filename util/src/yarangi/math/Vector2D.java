@@ -1,5 +1,7 @@
 package yarangi.math;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 /**
  * Implementation of bi-dimensional vector.
  * TODO: compile vector math expressions?
@@ -45,6 +47,8 @@ public class Vector2D implements IVector2D
 	 */
 	public static int getCount() { return count; }
 	
+	protected static TObjectIntHashMap<String> rootsCount = new TObjectIntHashMap<String> (); 
+	
 	/**
 	 * Create a new vector with specified coordinate values.
 	 * @param x
@@ -52,9 +56,17 @@ public class Vector2D implements IVector2D
 	 */
 	protected Vector2D(double x, double y) 
 	{
+/*		if(rootsCount == null)
+			rootsCount = new TObjectIntHashMap<String> ();
+		String root = new Exception().getStackTrace()[2].toString();
+		if(rootsCount.contains( root ))
+			rootsCount.adjustValue( root, 1 );
+		else
+			rootsCount.put( root, 1 );*/
+		
 		this.x = x;
 		this.y = y;
-		count ++;
+		assert 0 < ++count;
 	}
 	
 	public static Vector2D R(double x, double y)
@@ -141,12 +153,17 @@ public class Vector2D implements IVector2D
 	{
 		setx(x); sety(y);
 	}
+	final public Vector2D set(IVector2D from)
+	{
+		setx(from.x()); sety(from.y());
+		return this;
+	}
 	/**
 	 * Calculates vector length.
 	 * @return
 	 */
 	@Override
-	final public double abs() { return Math.hypot(x, y); }
+	final public double abs() { return Math.sqrt(x*x+y*y); }
 
 	final public double absSquare()
 	{

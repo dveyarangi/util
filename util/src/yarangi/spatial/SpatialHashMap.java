@@ -243,7 +243,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 				}
 			}
 		
-		return -338;
+		return 42;
 	}
 	
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
