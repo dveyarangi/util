@@ -405,35 +405,30 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public void setModified(double x, double y)
 	{
-		modifiedTiles.add( getTile( x, y ) );
+		fireGridModified(getTile( x, y ));
 	}
 	
 	public void setModified(int x, int y)
 	{
-		modifiedTiles.add( getTileByIndex( x, y ) );
+		fireGridModified(getTileByIndex( x, y ) );
 	}
-	
-	/**
-	 * Retrieves a list of modified cells.
-	 * @return
-	 */
-	protected List <T> getModifiedTiles()
-	{
-		return modifiedTiles;
-	}
-	
+
 	@Override
-	public void setModificationListener(IGridListener <T> l) { listener = l; }
+	public void setModificationListener(IGridListener <T> l) 
+	{
+		if(listener != null)
+			throw new IllegalStateException("Grid modification listener is already set.");
+		listener = l; 
+	}
 	
 	/**
 	 * Fires cell modification event to listeners and clears modified cells queue.
 	 */
-	public void fireGridModified()
+	public void fireGridModified(T tile)
 	{
 		if(listener != null)
-			listener.tilesModified( modifiedTiles );
+			listener.tilesModified( tile );
 		// resetting modified cells queue:
-		modifiedTiles = new LinkedList <T> ();
 	}
 	
 		
