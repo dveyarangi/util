@@ -47,7 +47,7 @@ public class Angles
 	}
 	
 	private final static int toTrigoIndex(double angle) {
-		return (int) Math.round( angle * INV_TRIG_STEP );
+		return FastMath.round( angle * INV_TRIG_STEP );
 	}
 	
 	public static double toRadians(double degrees)

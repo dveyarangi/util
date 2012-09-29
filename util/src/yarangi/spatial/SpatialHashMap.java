@@ -239,9 +239,9 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 						if(sensor.objectFound(obj))
 							break found;
 					objectArea.setPassId( passId );
-					}			
-				}
+				}			
 			}
+		}
 		
 		return 42;
 	}
