@@ -430,4 +430,10 @@ public class PolygonArea implements Area
 	{
 		return Zen.notSupported();
 	}
+
+	@Override
+	public boolean contains(double x, double y)
+	{
+		return Zen.notSupported();
+	}
 }

@@ -253,5 +253,10 @@ public class AABB implements Area
 		// TODO Auto-generated method stub
 		return false;
 	}
+	@Override
+	public boolean contains(double x, double y)
+	{
+		return x >= getMinX() && x <= getMaxX() && y >= getMinY() && y <= getMaxY();
+	}
 
 }

@@ -176,10 +176,18 @@ public interface Area
 		{
 			Zen.notSupported();
 		}
+
+		@Override
+		public boolean contains(double x, double y)
+		{
+			return false;
+		}
 	
 	};
 
 	public boolean overlaps(AABB area);
+
+	public boolean contains(double x, double y);
 	
 
 }

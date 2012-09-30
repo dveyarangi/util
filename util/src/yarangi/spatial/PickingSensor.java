@@ -17,13 +17,19 @@ public class PickingSensor <K extends ISpatialObject> implements ISpatialSensor 
 	 */
 	private K object;
 	
-	public PickingSensor()
+	private double x, y;
+	
+	private double minDist = Double.MAX_VALUE;
+	
+	public PickingSensor(double x, double y)
 	{
-		this(null);
+		this(x, y, null);
 	}
 	
-	public PickingSensor(ISpatialFilter <K> filter)
+	public PickingSensor(double x, double y, ISpatialFilter <K> filter)
 	{
+		this.x = x;
+		this.y = y;
 		this.filter = filter;
 	}
 
@@ -32,8 +38,16 @@ public class PickingSensor <K extends ISpatialObject> implements ISpatialSensor 
 	{
 		if(filter == null || filter.accept( object ))
 		{
-			this.object = object;
-			return true; // terminating query
+			if(object.getArea().contains(x, y)) {
+				this.object = object;
+				return true;
+			}
+//			double dist = (object.getArea().getAnchor().x() - x) * (object.getArea().getAnchor().x() - x) +
+//						  (object.getArea().getAnchor().y() - y) * (object.getArea().getAnchor().y() - y);
+//			if(minDist > dist) {
+//				this.minDist = dist;
+//			}
+//			return false; // terminating query
 		}
 		
 		return false;
@@ -48,6 +62,7 @@ public class PickingSensor <K extends ISpatialObject> implements ISpatialSensor 
 	public void clear()
 	{
 		object = null;
+		minDist = Double.MAX_VALUE;
 	}
 
 }

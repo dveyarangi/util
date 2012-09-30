@@ -98,4 +98,10 @@ public class CircleArea implements Area
 	{
 		return Zen.notSupported( );
 	}
+
+	@Override
+	public boolean contains(double x, double y)
+	{
+		return (center.x()-x)*(center.x()-x) + (center.y()-y)*(center.y()-y) < radius*radius;
+	}
 }

@@ -158,4 +158,10 @@ public class PointArea implements Area
 		return ref.x() >= area.getMinX() && ref.x() <= area.getMaxX()
 		    && ref.y() >= area.getMinY() && ref.y() <= area.getMaxY();
 	}
+
+	@Override
+	public boolean contains(double x, double y)
+	{
+		return x == ref.x() && y == ref.y();
+	}
 }
