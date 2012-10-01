@@ -41,6 +41,12 @@
 		<buildnumber file="build.number"/>
 		<property name="jar.name" value="${name}-${version.number}.b${build.number}.jar" />
 		<jar destfile="${jar.name}" basedir="${classes.dir}" />
+	   	<!--signjar jar="${jar.name}" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" />
+	   	<signjar jar="lib/commons-io-2.0.1.jar" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" signedJar="commons-io-2.0.1.jar"/>
+	   	<signjar jar="lib/guava-13.0.1.jar" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" signedJar="guava-13.0.1.jar"/>
+	   	<signjar jar="lib/log5j-2.1.2.jar" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" signedJar="log5j-2.1.2.jar"/>
+	   	<signjar jar="lib/trove-3.0.0rc1.jar" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" signedJar="trove-3.0.0rc1.jar" />
+	   	<signjar jar="lib/gson-1.7.1.jar" alias="jarkey" keystore="key.store" storepass="kukaracha" keypass="kukaracha" signedJar="gson-1.7.1.jar" /!-->
 	</target>
 		
 </project>
