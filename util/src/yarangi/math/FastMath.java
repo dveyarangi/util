@@ -6,8 +6,8 @@ public class FastMath
 	   private static final double BIG_ENOUGH_FLOOR = BIG_ENOUGH_INT;
 	   private static final double BIG_ENOUGH_ROUND = BIG_ENOUGH_INT + 0.5;
 	   
-	   public static final double ROOT_2 = Math.sqrt(2);
-	   public static final double ROOT_3 = Math.sqrt(3);
+	   public static final double SQRT2 = Math.sqrt(2);
+	   public static final double SQRT3 = Math.sqrt(3);
 	 
 	   public static int floor(double x) {
 	      return (int) (x + BIG_ENOUGH_FLOOR) - BIG_ENOUGH_INT;
