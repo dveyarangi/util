@@ -15,6 +15,9 @@ public class RandomUtil
 	public static double getRandomDouble(double d) {
 		return d*random.nextDouble();
 	}
+	public static float getRandomFloat(float d) {
+		return d*random.nextFloat();
+	}
 	
 	/**
 	 * Normal distribution around mean
