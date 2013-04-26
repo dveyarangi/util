@@ -1,8 +1,5 @@
 package yarangi.spatial;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import yarangi.math.FastMath;
 
 /**
@@ -37,7 +34,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	/** 
 	 * 1/cellSize, to speed up some calculations
 	 */
-	private final double invCellsize;
+	private final float invCellsize;
 	
 	/** 
 	 * cellSize/2
@@ -57,11 +54,13 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	/**
 	 * Used by query methods to mark tested objects and avoid result duplication;
 	 * thusly permits only single threaded usage. 
+	 * TODO: still can be made synchronous by introducing a racing condition semaphore
 	 */
 	private int passId;
 	
-	protected List <T> modifiedTiles = new LinkedList <T> ();
-	
+	/**
+	 * Customizable handler for tiles that had been messed with.
+	 */
 	protected IGridListener <T> listener;
 	
 	/**
@@ -87,7 +86,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		
 
 		minX = (float)Math.ceil( -width/2f);
-		maxX = (float)Math.floor(width/2f);
+		maxX = (float)Math.floor( width/2f);
 		minY = (float)Math.ceil(-height/2f);
 		maxY = (float)Math.floor(height/2f);
 		
@@ -132,7 +131,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		int i = toGridXIndex(x);
 		int j = toGridYIndex(y);
 		if(i < 0 || i >= gridWidth || j < 0 || j >= gridHeight)
-			return -1;
+			throw new IllegalArgumentException("Invalid grid coordinate [" + x + ", " + y + "].");
 		return indexAtTile(i, j);
 	}
 
@@ -143,7 +142,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final int toGridXIndex(double x)
 	{
-		return FastMath.floor(x * invCellsize) + halfGridWidth;
+		return FastMath.floor(invCellsize * (float)x ) + halfGridWidth;
 	}
 	
 	/**
@@ -153,7 +152,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final int toLowerGridXIndex(double x)
 	{
-		return FastMath.floor(x * invCellsize) + halfGridWidth;
+		return FastMath.floor(invCellsize * (float)x ) + halfGridWidth;
 	}
 	/**
 	 * Converts a model x coordinate to cell dimensional index.
@@ -162,7 +161,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final int toHigherGridXIndex(double x)
 	{
-		return FastMath.ceil(x * invCellsize) + halfGridWidth;
+		return FastMath.ceil(invCellsize * (float)x ) + halfGridWidth;
 	}
 	
 	/**
@@ -179,10 +178,10 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * @param value
 	 * @return
 	 */
-	public final int toGridYIndex(double x)
+	public final int toGridYIndex(double y)
 	{
 //		System.out.println(x + " " + x*invCellsize + " " + FastMath.round(x * invCellsize) + halfGridHeight);
-		return FastMath.floor(x * invCellsize) + halfGridHeight;
+		return FastMath.floor(invCellsize * (float)y ) + halfGridHeight;
 	}
 	/**
 	 * Converts a model x coordinate to cell dimensional index.
@@ -191,7 +190,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final int toLowerGridYIndex(double y)
 	{
-		return FastMath.floor(y * invCellsize) + halfGridHeight;
+		return FastMath.floor(invCellsize * (float)y ) + halfGridHeight;
 	}
 	/**
 	 * Converts a model x coordinate to cell dimensional index.
@@ -200,7 +199,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final int toHigherGridYIndex(double y)
 	{
-		return FastMath.ceil(y * invCellsize) + halfGridHeight;
+		return FastMath.ceil(invCellsize * (float)y ) + halfGridHeight;
 	}
 	
 	/**
@@ -265,11 +264,11 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * @return
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	public final T getTile(double x, double y)
+	public final T getTileByCoord(double x, double y)
 	{
 		int idx = indexAtCoord(x,y);
 		if(idx < 0 || idx >= map.length)
-			return null;
+			throw new IllegalArgumentException("Specified coordinate [" + x + "," + y + "] is not inside the grid.");
 		return map[idx];
 	}
 	
@@ -282,41 +281,50 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public final T getTileByIndex(int i, int j)
 	{
-		int idx = indexAtTile(i, j);
-		if(idx < 0 || idx >= map.length)
-			return null;
-		return map[idx];
-	}
-	
-	public final O getContentByIndex(int i, int j)
-	{
-		T tile = getTileByIndex( i, j );
-		if(tile != null)
-			return tile.get();
-		
-		return null;
-	}
-	public final O getContentByCoord(double x, double y)
-	{
-		return getTile( x, y ).get();
-	}
-	
-	public final T getTileAt(int i, int j)
-	{
 		int idx = indexAtTile( i, j );
+		if(idx < 0 || idx >= map.length)
+			return null;//throw new IllegalArgumentException( "Invalid tile index [" + i + "," + j + "].");
 		T tile = map[idx];
 		if(tile == null)
 		{
 			double x = toXCoord( i );
-			double y = toXCoord( j );
+			double y = toYCoord( j );
 			tile = createEmptyCell( i, j, x, y );
 			map[idx] = tile;
-			setModified(x, y);
+			setModifiedByIndex(i, j);
 		}
 		
 		return tile;
 	}
+		
+	/**
+	 * Retrieves contents of tile at specified index.
+	 * @param i
+	 * @param j
+	 * @return
+	 */
+	public final O getContentByIndex(int i, int j)
+	{
+		return getTileByIndex( i, j ).get();
+	}
 	
+	/**
+	 * Retrieves contents of tile at specified coordinate.
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public final O getContentByCoord(double x, double y)
+	{
+		return getTileByCoord( x, y ).get();
+	}
+
+	/**
+	 * Puts tile contents.
+	 * @param x
+	 * @param y
+	 * @param object
+	 */
 	public final void put(double x, double y, O object)
 	{
 		// TODO: dissolve, if hitting not in the cell center?
@@ -329,10 +337,10 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		{
 			tile = createEmptyCell( i, j, toXCoord( i ), toYCoord( j ) );
 			map[idx] = tile;
-			setModified(x ,y);
+			setModifiedByIndex(i, j);
 		}
 		if(tile.put( object ))
-			setModified(x, y);
+			setModifiedByIndex(i, j);
 				
 	}
 	
@@ -345,15 +353,15 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 			return;
 		
 		if(tile.remove( object ))
-			setModified(x, y);
+			setModifiedByCoord(x, y);
 				
 	}
 	
-	protected final void putAtIndex(int x, int y, T tile)
+	protected final void putAtIndex(int i, int j, T tile)
 	{
 		// TODO: dissolve, if hitting not in the cell center?
 //		System.out.println(x + " : " + y + " : " + at(x,y));
-		map[indexAtTile( x, y )] = tile;
+		map[indexAtTile( i, j )] = tile;
 	}
 
 	/**
@@ -391,9 +399,9 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	
 
 	@Override
-	public boolean isEmptyAt(float x, float y)
+	public boolean isEmptyAtCoord(float x, float y)
 	{
-		T tile = getTile( x, y );
+		T tile = getTileByCoord( x, y );
 		if(tile == null || tile.get() == null)
 			return true;
 		return false;
@@ -403,16 +411,31 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 * Adds a cell to modified cells queue.
 	 * @param cell
 	 */
-	public void setModified(double x, double y)
+	public void setModifiedByCoord(double x, double y)
 	{
-		fireGridModified(getTile( x, y ));
+		T tile = getTileByCoord( x, y );
+		if(tile == null)
+			throw new IllegalArgumentException("No tile at coords [" + x + "," + y + "].");
+		fireGridModified( tile );
 	}
 	
-	public void setModified(int x, int y)
+	/**
+	 * 
+	 * 
+	 * @param i
+	 * @param j
+	 */
+	public void setModifiedByIndex(int i, int j)
 	{
-		fireGridModified(getTileByIndex( x, y ) );
+		T tile = getTileByIndex( i, j );
+		if(tile == null)
+			throw new IllegalArgumentException("No tile at index [" + i + "," + j + "].");
+		fireGridModified( tile );
 	}
 
+	/**
+	 * Defines a handler for modified tiles; only one is allowed
+	 */
 	@Override
 	public void setModificationListener(IGridListener <T> l) 
 	{
@@ -426,17 +449,30 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 	 */
 	public void fireGridModified(T tile)
 	{
+		if(tile == null)
+			throw new NullPointerException( "Tile cannot be null." );
 		if(listener != null)
 			listener.tilesModified( tile );
 		// resetting modified cells queue:
 	}
 	
-		
+	/**
+	 * Queries the specified area for objects; found objects are fed to {@link ISpatialSensor#objectFound(Object)} method.	
+	 * @param sensor
+	 * @param aabb
+	 * @return the same sensor
+	 */
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
 	{
 		return queryAABB( sensor, aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY() );
 	}
 	
+	/**
+	 * Queries the specified rectangle for objects; found objects are fed to {@link ISpatialSensor#objectFound(Object)} method.	
+	 * @param sensor
+	 * @param aabb
+	 * @return the same sensor
+	 */
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double rx, double ry)
 	{
 
@@ -469,12 +505,17 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 
 	
 	/**
-	 * {@inheritDoc}
+	 * Queries the specified circle for objects; found objects are fed to {@link ISpatialSensor#objectFound(Object)} method.	
+	 * @param x - circle center x coord
+	 * @param y - circle center y coord
+	 * @param radius - circle radius
+	 * @param aabb
+	 * @return the same sensor
 	 */
-	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
+	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radius)
 	{
-		// TODO: spiral iteration, remove this root calculation:
-		double radius = Math.sqrt(radiusSquare);
+		// TODO: spiral iteration?
+		double radiusSquare = radius * radius;
 		int minx = Math.max(toLowerGridXIndex(x-radius-cellSize), 0);
 		int miny = Math.max(toLowerGridYIndex(y-radius-cellSize), 0);
 		int maxx = Math.min(toLowerGridXIndex(x+radius), gridWidth);
@@ -503,40 +544,40 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 
 	public final ISpatialSensor <O> queryLine(ISpatialSensor <O> sensor, double ox, double oy, double dx, double dy)
 	{
-		int currGridx = toGridXIndex(ox);
-		int currGridy = toGridYIndex(oy);
+		int currGridI = toGridXIndex(ox);
+		int currGridJ = toGridYIndex(oy);
 		double tMaxX, tMaxY;
 		double tDeltaX, tDeltaY;
-		int stepX, stepY;
+		int stepI, stepJ;
 		if(dx > 0)
 		{
 			tMaxX = ((FastMath.toGrid( ox, cellSize ) + halfCellSize) - ox) / dx;
 			tDeltaX = cellSize / dx;
-			stepX = 1;
+			stepI = 1;
 		}					
 		else
 		if(dx < 0)
 		{
 			tMaxX = ((FastMath.toGrid( ox, cellSize ) - halfCellSize) - ox) / dx;
 			tDeltaX = -cellSize / dx;
-			stepX = -1;
+			stepI = -1;
 		}
-		else { tMaxX = Double.MAX_VALUE; tDeltaX = 0; stepX = 0;}
+		else { tMaxX = Double.MAX_VALUE; tDeltaX = 0; stepI = 0;}
 		
 		if(dy > 0)
 		{
 			tMaxY = ((FastMath.toGrid( oy, cellSize ) + halfCellSize) - oy) / dy;
 			tDeltaY = cellSize / dy;
-			stepY = 1;
+			stepJ = 1;
 		}
 		else
 		if(dy < 0)
 		{
 			tMaxY = ((FastMath.toGrid( oy, cellSize ) - halfCellSize) - oy) / dy;
 			tDeltaY = -cellSize / dy;
-			stepY = -1;
+			stepJ = -1;
 		}
-		else { tMaxY = Double.MAX_VALUE; tDeltaY = 0; stepY = 0;}
+		else { tMaxY = Double.MAX_VALUE; tDeltaY = 0; stepJ = 0;}
 		
 		int passId = createNextQueryId();
 
@@ -548,14 +589,14 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 			if(tMaxX < tMaxY)
 			{
 				tMaxX += tDeltaX;
-				currGridx += stepX;
+				currGridI += stepI;
 			}
 			else
 			{
 				tMaxY += tDeltaY;
-				currGridy += stepY;
+				currGridJ += stepJ;
 			}
-			tile = getTileByIndex(currGridx, currGridy);
+			tile = getTileByIndex(currGridI, currGridJ);
 			if(tile != null)
 			{
 				if(tile.query(sensor, passId))
@@ -609,14 +650,14 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		}
 	};
 	
-	private interface IQueryingConsumer <T, O> extends IChunkConsumer
+/*	private interface IQueryingConsumer <T, O> extends IChunkConsumer
 	{
 		public void setSensor(ISpatialSensor <O> sensor);
 
 		public void setQueryId(int nextPassId);
-	}
+	}*/
 	
-	private final IQueryingConsumer <T, O> queryingConsumer = new IQueryingConsumer <T, O>()
+/*	private final IQueryingConsumer <T, O> queryingConsumer = new IQueryingConsumer <T, O>()
 	{
 		private ISpatialSensor <O> sensor;
 		private int passId;
@@ -636,7 +677,7 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 		@Override
 		public boolean consume(IAreaChunk chunk)
 		{
-			T tile = getTile(chunk.getX(), chunk.getY());
+			T tile = getTileByCoord(chunk.getX(), chunk.getY());
 			if(tile != null)
 			{
 //				System.out.println(chunk.getX() + " : " + chunk.getY());
@@ -644,6 +685,6 @@ public abstract class GridMap <T extends ITile<O>, O> implements IGrid <T>
 			}
 			return false;
 		}
-	};
+	};*/
 
 }
