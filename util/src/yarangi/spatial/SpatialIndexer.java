@@ -3,6 +3,8 @@ package yarangi.spatial;
 import java.util.HashMap;
 import java.util.Set;
 
+import com.spinn3r.log5j.Logger;
+
 /**
  * Common interface for spatial indexing data structures.
  * 
@@ -15,7 +17,15 @@ public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpat
 	 * Id to location mapping, to keep and eye on object updates.
 	 * TODO: switch to primitive int key hash (Trove?)
 	 */
-	private final HashMap <K, Area> locations = new HashMap <K, Area> ();
+	private final HashMap <K, AABB> locations = new HashMap <K, AABB> ();
+	
+	protected final Logger log;
+	
+
+	protected SpatialIndexer(String name)
+	{
+		 log = Logger.getLogger(name);
+	}
 	
 //	private TIntObjectMap <AABB> locations = new TIntObjectHashMap <AABB> ();
 	
@@ -29,7 +39,7 @@ public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpat
 	 * @param aabb
 	 * @param object
 	 */
-	public void add(Area area, K object)
+	public void add(AABB area, K object)
 	{
 		area = area.clone();
 		addObject(area, object);
@@ -48,23 +58,28 @@ public abstract class SpatialIndexer <K extends ISpatialObject> implements ISpat
 		if(oldLocation == null)
 			throw new IllegalArgumentException("The object [" + object + "] was not added to the indexer.");
 		
-		return removeObject(oldLocation, object);
+		K removedObject = removeObject(oldLocation, object);
+		AABB.release( (AABB)oldLocation );
+		return removedObject;
 	}
 	
 	/**
 	 * Updates an {@link AABB} box location.
+	 * TODO:OPTIMIZE - too many AABB cloning
 	 * @param aabb
 	 * @param object
 	 */
-	public void update(Area area, K object)
+	public void update(AABB area, K object)
 	{
-		Area oldLocation = locations.get(object);
+		AABB oldLocation = locations.get(object);
 		if(oldLocation == null)
 			throw new IllegalArgumentException("The object [" + object + "] is not updateble by the indexer.");
-		Area newLocation = area.clone();
+		AABB newLocation = area.clone();
 		
 		locations.put(object, newLocation);
 		updateObject(oldLocation, newLocation, object);
+		
+		AABB.release(oldLocation);
 	}
 	
 /*	public void update(K object, IAreaChunk chunk)

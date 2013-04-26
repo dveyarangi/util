@@ -10,6 +10,10 @@ public class Body
 	private Vector2D velocity = Vector2D.ZERO();
 	private double mass = 1;
 	private double maxSpeedSquare = 1;
+	private double maxSpeed;
+	private double rotationVelocity = 0;
+	
+	private double frictionCoef = 0;
 	
 	private boolean isInert = true;
 	
@@ -19,6 +23,7 @@ public class Body
 	public Body(double mass, double maxSpeed) 
 	{
 		this.mass = mass;
+		this.maxSpeed = maxSpeed;
 		this.maxSpeedSquare = maxSpeed*maxSpeed;
 	}
 	
@@ -51,6 +56,18 @@ public class Body
 		velocity.y = y;
 	}*/
 	
+	final public void setFrictionCoef(double coef) {
+		this.frictionCoef = coef;
+	}
+	
+	final public double getFrictionCoef() { return frictionCoef; }
+	
+	final public void setRotationVelocity(double rv) {
+		this.rotationVelocity = rv;
+	}
+	
+	final public double getRotationVelocity() { return rotationVelocity; }
+	
 	final public void addForce(Vector2D force)
 	{
 		this.force.add(force.x(), force.y());
@@ -60,7 +77,7 @@ public class Body
 		force.add(x, y);
 	}
 	
-	final public void setVelociry(double x, double y) 
+	final public void setVelocity(double x, double y) 
 	{
 		velocity.setxy( x, y );
 		double abs = velocity.x() * velocity.x() + velocity.y()*velocity.y();
@@ -82,7 +99,11 @@ public class Body
 	}
 
 	public final double getMaxSpeedSquare() { return maxSpeedSquare; }
-	public final void setMaxSpeed(double maxSpeed) {this.maxSpeedSquare = maxSpeed*maxSpeed; }
+	public final double getMaxSpeed() { return maxSpeed; }
+	public final void setMaxSpeed(double maxSpeed) {
+		this.maxSpeed = maxSpeed;
+		this.maxSpeedSquare = maxSpeed*maxSpeed; 
+	}
 	
 	public final boolean isInert() { return isInert; }
 }

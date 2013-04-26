@@ -3,6 +3,8 @@ package yarangi.spatial;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.spinn3r.log5j.Logger;
+
 import yarangi.math.FastMath;
 
 /**
@@ -28,12 +30,12 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	/**
 	 * dimensions of area this hashmap represents
 	 */
-	private int width, height;
+	private float width, height;
 
 	/**
 	 * size of single hash cell
 	 */
-	private int cellSize; 
+	private float cellSize; 
 	
 	/** 
 	 * 1/cellSize, to speed up some calculations
@@ -54,7 +56,6 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 */
 	private int passId;
 	
-	
 	/**
 	 * 
 	 * @param size amount of buckets
@@ -63,21 +64,25 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * @param height covered area height
 	 */
 	@SuppressWarnings("unchecked")
-	public SpatialHashMap(int size, int cellSize, int width, int height)
+	public SpatialHashMap(String name, int size, float cellSize, float width, float height)
 	{
+		
+		super(name);
+		
 		this.size = size;
 		
 		this.width = width;
 		this.height = height;
 		this.cellSize = cellSize;
 		this.invCellsize = 1. / this.cellSize;
-		this.halfGridWidth = width/2/cellSize;
-		this.halfGridHeight = height/2/cellSize;
+		this.halfGridWidth = (int)(width/2/cellSize);
+		this.halfGridHeight = (int)(height/2/cellSize);
 		this.halfCellSize = cellSize/2.;
 		map = new Set[size];
 		for(int idx = 0; idx < size; idx ++)
 			map[idx] = new HashSet <O> ();
-//		System.out.println(halfWidth + " : " + halfHeight);
+		
+		log.trace( "Creating spatial hashmap [" + width + "x" + height + "] with [" + size + "] bins.");
 	}
 	
 	/**
@@ -86,8 +91,9 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * @param height
 	 * @param averageAmount
 	 */
-	public SpatialHashMap(int width, int height, int averageAmount)
+	public SpatialHashMap(String name, int width, int height, int averageAmount)
 	{
+		super(name);
 		throw new IllegalStateException("Not implemented yet.");
 	}
 	
@@ -95,12 +101,14 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	/**
 	 * @return width of the area, covered by this map
 	 */
-	public final int getHeight() { return height; }
+	@Override
+	public final float getHeight() { return height; }
 
 	/**
 	 * @return height of the area, covered by this map
 	 */
-	public final int getWidth() { return width; }
+	@Override
+	public final float getWidth() { return width; }
 
 	/**
 	 * @return size (height and width) of a single cell
@@ -232,7 +240,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 					if(!(obj.getArea() instanceof AABB))
 						continue; // TODO: too silent.
 					
-					objectArea = (AABB) obj.getArea();
+					objectArea = obj.getArea();
 					if(objectArea.getPassId() == passId)
 						continue;
 					if(objectArea.overlaps( minx, miny, maxx, maxy ))
@@ -248,7 +256,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, AABB aabb)
 	{
-		return queryAABB( sensor, aabb.getCenterX(), aabb.getCenterY(), aabb.getRX(), aabb.getRY() );
+		return queryAABB( sensor, (float)aabb.getCenterX(), (float)aabb.getCenterY(), (float)aabb.getRX(), (float)aabb.getRY() );
 	}
 	@Override
 	public ISpatialSensor <O> queryAABB(ISpatialSensor <O> sensor, double cx, double cy, double rx, double ry)
@@ -278,10 +286,10 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radiusSquare)
+	public final ISpatialSensor <O> queryRadius(ISpatialSensor <O> sensor, double x, double y, double radius)
 	{
 		// TODO: spiral iteration, remove this root calculation:
-		double radius = Math.sqrt(radiusSquare);
+		double radiusSquare = radius*radius;
 		int minx = Math.max(toGridIndex(x-radius), -halfGridWidth);
 		int miny = Math.max(toGridIndex(y-radius), -halfGridHeight);
 		int maxx = Math.min(toGridIndex(x+radius),  halfGridWidth);
@@ -385,7 +393,7 @@ public class SpatialHashMap <O extends ISpatialObject> extends SpatialIndexer<O>
 				if(object.getArea().getPassId() == passId)
 					continue;
 				
-				AABB aabb = (AABB) object.getArea();
+				AABB aabb = object.getArea();
 				if(aabb.crosses(ox, oy, dx, dy))
 					if(sensor.objectFound(object))
 						break;
