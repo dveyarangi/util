@@ -1,5 +1,6 @@
 package yarangi.math;
 
+import yarangi.java.AllocationMapper;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
@@ -31,6 +32,8 @@ public class Vector2D implements IVector2D
 	 */
 	private static int count = 0;
 	
+	private static AllocationMapper amap = new AllocationMapper();
+	
 	/**
 	 * Creates a new zero vector.
 	 * @return
@@ -47,8 +50,6 @@ public class Vector2D implements IVector2D
 	 */
 	public static int getCount() { return count; }
 	
-	protected static TObjectIntHashMap<String> rootsCount = new TObjectIntHashMap<String> (); 
-	
 	/**
 	 * Create a new vector with specified coordinate values.
 	 * @param x
@@ -56,17 +57,11 @@ public class Vector2D implements IVector2D
 	 */
 	protected Vector2D(double x, double y) 
 	{
-/*		if(rootsCount == null)
-			rootsCount = new TObjectIntHashMap<String> ();
-		String root = new Exception().getStackTrace()[2].toString();
-		if(rootsCount.contains( root ))
-			rootsCount.adjustValue( root, 1 );
-		else
-			rootsCount.put( root, 1 );*/
+//		amap.record();
 		
 		this.x = x;
 		this.y = y;
-		assert 0 < ++count;
+		assert 0 <++ count;
 	}
 	
 	public static Vector2D R(double x, double y)
@@ -149,9 +144,10 @@ public class Vector2D implements IVector2D
 	
 	final public void setx(double x) { this.x = x; }
 	final public void sety(double y) { this.y = y; }
-	final public void setxy(double x, double y)
+	final public Vector2D setxy(double x, double y)
 	{
 		setx(x); sety(y);
+		return this;
 	}
 	final public Vector2D set(IVector2D from)
 	{

@@ -1,8 +1,11 @@
 package yarangi.spatial;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
+import yarangi.java.AllocationMapper;
 import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
@@ -15,7 +18,7 @@ public class AABB implements Area
 	/**
 	 * center point
 	 */
-	private final Vector2D ref;
+	private Vector2D ref = Vector2D.ZERO();
 	
 	/**
 	 * half-width of the square
@@ -30,14 +33,32 @@ public class AABB implements Area
 	
 	private int passId;
 	
+	private static AllocationMapper amap = new AllocationMapper();
+	
+	private static Queue <AABB> pool = new LinkedList <AABB> ();
+	
+	private static AABB getAABB()
+	{
+		if(pool.isEmpty())
+			return new AABB();
+		else
+			return pool.poll();
+	}
+	
+	public static void release(AABB aabb)
+	{
+		pool.add( aabb );
+	}
 
 	public static AABB createSquare(double x, double y, double r, double a)
 	{
-		return new AABB(x, y, r, r, a);
+		AABB aabb = getAABB();
+		return aabb.update( x, y, r, r, a );
 	}
 	public static AABB createSquare(Vector2D center, double r, double a)
 	{
-		return new AABB(center.x(), center.y(), r, r, a);
+		AABB aabb = getAABB();
+		return aabb.update(center.x(), center.y(), r, r, a);
 	}
 	
 	public static AABB createFromEdges(double x1, double y1, double x2, double y2, double a)
@@ -45,12 +66,26 @@ public class AABB implements Area
 		double rx = (x2 - x1) / 2.;  
 		double ry = (y2 - y1) / 2.;
 		
-		return new AABB(x1+rx, y1+ry, rx, ry, a);
+		AABB aabb = getAABB();
+		return aabb.update(x1+rx, y1+ry, rx, ry, a);
 	}
 	
 	public static AABB createFromCenter(double cx, double cy, double rx, double ry, double a)
 	{
-		return new AABB(cx, cy, rx, ry, a);
+		AABB aabb = getAABB();
+		return aabb.update(cx, cy, rx, ry, a);
+	}
+	
+	public static AABB createPoint(double x, double y)
+	{
+		AABB aabb = getAABB();
+		return aabb.update(x, y, 0, 0, 0);
+	}
+
+	
+	protected AABB()
+	{
+//		amap.record();
 	}
 	
 	/**
@@ -61,23 +96,25 @@ public class AABB implements Area
 	 * @param a box orientation (degrees)
 	 */
 	
-	protected AABB(double x, double y, double rx, double ry, double a)
+	protected AABB update(double x, double y, double rx, double ry, double a)
 	{
-		this.ref = Vector2D.R(x, y);
+		this.ref.setxy( x, y );
 		rmax = Math.max(rx, ry);
 		this.rx = rx;
 		this.ry = ry;
 		this.a = a;
+		return this;
 	}
 	
 	/**
 	 * Copy ctor.
 	 * @param aabb
 	 */
-	protected AABB(AABB aabb)
+/*	protected AABB(AABB aabb)
 	{
 		this(aabb.ref.x(), aabb.ref.y(), aabb.getRX(), aabb.getRY(), aabb.getOrientation());
-	}
+		amap.record();
+	}*/
 	
 	/**
 	 * {@inheritDoc}
@@ -192,7 +229,10 @@ public class AABB implements Area
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Area clone() { return new AABB(this); }
+	public AABB clone() { 
+		AABB aabb = getAABB();
+		return aabb.update(this.ref.x(), this.ref.y(), this.getRX(), this.getRY(), this.getOrientation()); 
+	}
 	
 	/**
 	 * {@inheritDoc}
@@ -258,5 +298,6 @@ public class AABB implements Area
 	{
 		return x >= getMinX() && x <= getMaxX() && y >= getMinY() && y <= getMaxY();
 	}
+
 
 }
