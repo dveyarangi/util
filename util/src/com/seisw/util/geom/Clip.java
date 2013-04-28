@@ -45,6 +45,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * <code>Clip</code> is a Java version of the <i>General Poly Clipper</i> algorithm
@@ -86,8 +87,24 @@ public class Clip
    private static final int CLIP = 0 ;
    private static final int SUBJ = 1 ;
    
-   private final List <EdgeNode> edgeNodesPool = new LinkedList <EdgeNode> ();
+   private static final Queue <EdgeNode> edgeNodesPool = new LinkedList <EdgeNode> ();
    
+   public static EdgeNode getNode() {
+	   if(edgeNodesPool.isEmpty())
+		   return new EdgeNode();
+	   
+	   EdgeNode node = edgeNodesPool.poll();
+	   node.reset();
+	   return node;
+	   
+   }
+   
+   
+   private static void recycleNode(EdgeNode node)
+   {
+	   edgeNodesPool.add( node );
+   }
+
    
    // ------------------------
    // --- Member Variables ---
@@ -204,6 +221,8 @@ public class Clip
       /* Return a NULL result if no contours contribute */
       if (lmt_table.top_node == null)
       {
+    	  if(s_heap != null) s_heap.recycleNodes();
+    	  if(c_heap != null) c_heap.recycleNodes();
          return result;
       }
 
@@ -365,6 +384,8 @@ public class Clip
                }
                else
                {
+             	  if(s_heap != null) s_heap.recycleNodes();
+            	  if(c_heap != null) c_heap.recycleNodes();
                   throw new IllegalStateException("Unknown op");
                }
                
@@ -591,6 +612,9 @@ public class Clip
                   }
                   else
                   {
+                	  if(s_heap != null) s_heap.recycleNodes();
+                	  if(c_heap != null) c_heap.recycleNodes();
+
                      throw new IllegalStateException("Unknown op type, "+op);
                   }
                   
@@ -774,6 +798,9 @@ public class Clip
       
       /* Generate result polygon from out_poly */
       result = out_poly.getResult();
+      
+	  if(s_heap != null) s_heap.recycleNodes();
+	  if(c_heap != null) c_heap.recycleNodes();
             
       return result ;
    }
@@ -1741,10 +1768,18 @@ public class Clip
       
       private EdgeNode() {}
       
-      private void reset() {
-    	  vertex.x = 0; vertex.y = 0;
-    	  
-      }
+	  private void reset() {
+			vertex.x = vertex.y = 0;
+			bot.x = bot.y = 0;
+			top.x = top.y = 0;
+			xb = xt = dx = 0;
+			type = 0;
+			bundle[0][0] = bundle[0][1] = bundle[1][1] = bundle[1][0] = 0;
+			bside[0] = bside[1] = 0;
+			bstate[0] = bstate[1] = null;
+			outp[0] = outp[1] = null; // TODO: pool PolygonNode!
+			prev = next = pred = succ = next_bound = null;      
+	  }
    }
 
    private static class AetTree
@@ -1765,10 +1800,12 @@ public class Clip
    private static class EdgeTable
    {
       private final List <EdgeNode>m_List = new ArrayList<EdgeNode>();
+      
+      public EdgeTable() {}
    
       public void addNode( double x, double y )
       {
-         EdgeNode node = new EdgeNode();
+         EdgeNode node = Clip.getNode();
          node.vertex.x = x ;
          node.vertex.y = y ;
          m_List.add( node );
@@ -1809,6 +1846,14 @@ public class Clip
          EdgeNode prev = m_List.get(PREV_INDEX(i, m_List.size()));
          EdgeNode ith  = m_List.get(i);
          return (prev.vertex.getY() > ith.vertex.getY()) ;
+      }
+      
+      public void recycleNodes()
+      {
+    	  for(EdgeNode node : m_List)
+    	  {
+    		  recycleNode( node );
+    	  }
       }
    }
 
