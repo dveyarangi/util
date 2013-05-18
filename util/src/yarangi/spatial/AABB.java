@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import yarangi.java.AllocationMapper;
+import yarangi.java.InvokationMapper;
 import yarangi.math.IVector2D;
 import yarangi.math.Vector2D;
 
@@ -33,7 +33,7 @@ public class AABB implements Area
 	
 	private int passId;
 	
-	private static AllocationMapper amap = new AllocationMapper();
+	private static InvokationMapper amap = new InvokationMapper();
 	
 	private static Queue <AABB> pool = new LinkedList <AABB> ();
 	
