@@ -8,7 +8,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  * Helps to determine object allocation cause,
  * TODO: use by either javaagent or annotation
  */
-public class AllocationMapper
+public class InvokationMapper
 
 {
 	
@@ -22,7 +22,7 @@ public class AllocationMapper
 	{
 		if(rootsCount == null)
 			rootsCount = new TObjectIntHashMap<String> ();
-		String root = new Exception().getStackTrace()[3].toString();
+		String root = new Exception().getStackTrace()[depth].toString();
 		if(rootsCount.contains( root ))
 			rootsCount.adjustValue( root, 1 );
 		else
@@ -39,8 +39,9 @@ public class AllocationMapper
 		TObjectIntIterator<String> it = rootsCount.iterator();
 		while(it.hasNext())
 		{
-			System.out.println(it.value() + " >>> " + it.key());
 			it.advance();
+			System.out.println(it.value() + " >>> " + it.key());
+			
 		}
 	}
 }
