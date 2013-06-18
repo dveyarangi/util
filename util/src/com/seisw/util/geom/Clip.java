@@ -47,6 +47,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import yarangi.java.InvokationMapper;
+
 /**
  * <code>Clip</code> is a Java version of the <i>General Poly Clipper</i> algorithm
  * developed by Alan Murta (gpc@cs.man.ac.uk).  The home page for the original source can be 
@@ -88,10 +90,16 @@ public class Clip
    private static final int SUBJ = 1 ;
    
    private static final Queue <EdgeNode> edgeNodesPool = new LinkedList <EdgeNode> ();
+
+ //  private static InvokationMapper mapper = new InvokationMapper();
    
    public static EdgeNode getNode() {
 	   if(edgeNodesPool.isEmpty())
+	   {
+//		   mapper.record( 2 );
 		   return new EdgeNode();
+	   }
+
 	   
 	   EdgeNode node = edgeNodesPool.poll();
 	   node.reset();
@@ -1766,7 +1774,9 @@ public class Clip
       EdgeNode       succ;         /* Edge connected at the upper end   */
       EdgeNode       next_bound;   /* Pointer to next bound in LMT      */
       
-      private EdgeNode() {}
+      private EdgeNode() {
+ //   	  mapper.record( 2 );
+      }
       
 	  private void reset() {
 			vertex.x = vertex.y = 0;
