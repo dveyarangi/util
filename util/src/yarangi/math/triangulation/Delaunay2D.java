@@ -11,6 +11,10 @@ import yarangi.math.LexicographicComparator;
 import yarangi.math.Pair;
 import yarangi.math.Vector2D;
 
+/**
+ * Divide and conquer implementation of Delaunay triangulation.
+ * <a href="http://www.personal.psu.edu/faculty/c/x/cxc11/AERSP560/DELAUNEY/13_Two_algorithms_Delauney.pdf">
+ */
 public class Delaunay2D implements ITriangulator
 {
 
@@ -38,6 +42,8 @@ public class Delaunay2D implements ITriangulator
 				idx ++;
 			}
 			
+			if(adjacency.size() > 0 && ccwFrom(this.element, adjacency.get( 0 ).element, element.element))
+				return 0;
 			return adjacency.size();
 
 		}
@@ -61,7 +67,7 @@ public class Delaunay2D implements ITriangulator
 				idx = findInsertIdx( v );
 			else
 				idx = (idx + 1);
-			return adjacency.get( idx % adjacency.size());
+			return adjacency.get( (idx) % adjacency.size());
 		}
 		
 		public BilistElement SUCC(BilistElement v)
@@ -74,6 +80,26 @@ public class Delaunay2D implements ITriangulator
 		
 		@Override
 		public String toString() { return element.toString(); }
+		
+		@Override
+		public boolean equals(Object object)
+		{
+			if(this == object)
+				return true;
+			if(object == null)
+				return false;
+			if(!(object instanceof BilistElement))
+				return false;
+			
+			BilistElement that = (BilistElement) object;
+			return that.element.equals( this.element );
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return element.hashCode();
+		}
 	}
 	
 	private static class Tangent extends Pair <BilistElement>
@@ -111,6 +137,8 @@ public class Delaunay2D implements ITriangulator
 	@Override
 	public TriangleStore triangulate(List <IVector2D> points)
 	{
+		if(points.size() <= 2)
+			return null;
 		// converting to array list, as it is faster to split it:
 		ArrayList <IVector2D> nodes = new ArrayList <IVector2D> (points.size());
 		
@@ -237,7 +265,7 @@ public class Delaunay2D implements ITriangulator
 			if(ccwFrom( L.element, R.element, R1.element ))
 			{
 				BilistElement R2 = PRED(R, R1);
-				while(!Geometry.pointInCircumCirle( R2.element, L.element, R1.element, R.element))
+				while(L != R2 && !Geometry.pointInCircumCirle( R2.element, L.element, R1.element, R.element))
 				{
 					REMOVE( R, R1 );
 					store.removeTriangles( R.element, R1.element );
@@ -252,7 +280,7 @@ public class Delaunay2D implements ITriangulator
 			if(cwFrom(R.element, L.element, L1.element))
 			{
 				BilistElement L2 = SUCC(L, L1);
-				while(!Geometry.pointInCircumCirle(  L2.element, L.element,  L1.element, R.element))
+				while(R != L2 && !Geometry.pointInCircumCirle(  L2.element, L.element,  L1.element, R.element))
 				{
 					REMOVE( L, L1 );
 					store.removeTriangles( L.element, L1.element );
@@ -374,7 +402,7 @@ public class Delaunay2D implements ITriangulator
 	 */
 	public static boolean ccwFrom(IVector2D a, IVector2D b, IVector2D p)
 	{
-		return Vector2D.crossZComponent( b.x() - a.x(), b.y() - a.y(), p.x() - a.x(), p.y() - a.y() ) >= 0;
+		return Vector2D.crossZComponent( b.x() - a.x(), b.y() - a.y(), p.x() - a.x(), p.y() - a.y() ) > 0;
 	}
 	public static boolean cwFrom(IVector2D a, IVector2D b, IVector2D p)
 	{
@@ -384,7 +412,7 @@ public class Delaunay2D implements ITriangulator
 	{
 		Delaunay2D triang = new Delaunay2D();
 		
-/*		List <IVector2D> points = new ArrayList <IVector2D> ();
+		List <IVector2D> points = new ArrayList <IVector2D> ();
 		
 		points.add( Vector2D.R(-3,0) );
 		points.add( Vector2D.R(-2,2) );
@@ -400,16 +428,12 @@ public class Delaunay2D implements ITriangulator
 	
 		
 		Tangent hull = triang.triangulate( points, store );
-		System.out.println(hull);*/
+		System.out.println(hull);
 		
-		BilistElement element = new BilistElement( Vector2D.ZERO() );
-		element.insert( new BilistElement( Vector2D.R(-1, 1) ) );
-		element.insert( new BilistElement( Vector2D.R(1, -1) ) );
-		element.insert( new BilistElement( Vector2D.R(-2, -1) ) );
-		element.insert( new BilistElement( Vector2D.R(1, 1) ) );
-		element.insert( new BilistElement( Vector2D.R(-1, -1) ) );
-		
-		System.out.println(SUCC(element, new  BilistElement( Vector2D.R(1, 1) ) ));
-		System.out.println(PRED(element, new  BilistElement( Vector2D.R(1, 1) ) ));
+/*		BilistElement element = new BilistElement( Vector2D.R(-1.0, -2.0) );
+		element.insert( new BilistElement( Vector2D.R(1.0, -0.5) ) );
+		element.insert( new BilistElement( Vector2D.R(3.0, 0.0) ) );
+		element.insert( new BilistElement( Vector2D.R(1.0, 2.0) ) );
+		element.insert( new BilistElement( Vector2D.R(-3.0, 0.0) ) );*/
 	}
 }

@@ -84,7 +84,7 @@ public class Geometry
 		return determinant(x2, y2, d2, x3, y3, d3, px, py, pd)
 		     - determinant(x1, y1, d1, x3, y3, d3, px, py, pd)
 		     + determinant(x1, y1, d1, x2, y2, d2, px, py, pd)
-		     - determinant(x1, y1, d1, x2, y2, d2, x3, y3, d3) <= 0;
+		     - determinant(x1, y1, d1, x2, y2, d2, x3, y3, d3) < 0;
 	}
 	
 	public static double determinant(double x1, double y1, double x2, double y2)

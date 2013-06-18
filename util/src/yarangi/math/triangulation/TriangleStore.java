@@ -73,4 +73,6 @@ public class TriangleStore
 	}
 	
 	public Set <Edge> getEdges() { return edgeToPoint.keySet(); }
+	
+	public Set <UnorderedPair<IVector2D>> getLinks() { return links; }
 }
