@@ -84,6 +84,10 @@ public class Body
 		if(abs > getMaxSpeedSquare())
 			velocity.multiply(getMaxSpeedSquare()/abs);
 	}
+	final public void setVelocity(Vector2D v)
+	{
+		setVelocity( v.x(), v.y() );
+	}
 	
 	final public void addVelocity(double x, double y)
 	{
