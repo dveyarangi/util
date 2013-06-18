@@ -30,4 +30,20 @@ public class Histogram
 		
 		return sum;
 	}
+	
+	public static float bhattacharyyaCoef(float [] h1, float [] h2)
+	{
+		float sum = 0;
+		for(int i = 0; i < h1.length; i ++)
+		{
+			sum += (float)Math.sqrt(h1[i]*h2[i]);
+		}
+		
+		return sum;
+	}
+	
+	public static float bhattacharyyaDistance(float [] h1, float [] h2)
+	{
+		return - (float)Math.log(bhattacharyyaCoef( h1, h2 ));
+	}
 }

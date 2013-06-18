@@ -1,7 +1,6 @@
 package yarangi.math;
 
-import yarangi.java.AllocationMapper;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import yarangi.java.InvokationMapper;
 
 /**
  * Implementation of bi-dimensional vector.
@@ -32,7 +31,7 @@ public class Vector2D implements IVector2D
 	 */
 	private static int count = 0;
 	
-	private static AllocationMapper amap = new AllocationMapper();
+	private static InvokationMapper amap = new InvokationMapper();
 	
 	/**
 	 * Creates a new zero vector.
@@ -208,9 +207,19 @@ public class Vector2D implements IVector2D
 	 * @param v
 	 * @return
 	 */
-	final public double crossZComponent(Vector2D v)
+	@Override
+	final public double crossZComponent(IVector2D v)
 	{
-		return x*v.y - y*v.x;
+		return crossZComponent( v.x(), v.y() );
+	}
+	@Override
+	final public double crossZComponent(double x, double y)
+	{
+		return crossZComponent(this.x, this.y, x, y);
+	}
+	final static public double crossZComponent(double x1, double y1, double x2, double y2)
+	{
+		return x1 * y2 - y1 * x2;
 	}
 	
 	/**
@@ -402,7 +411,7 @@ public class Vector2D implements IVector2D
 	@Override
 	public int hashCode()
 	{
-		return new Double(x).hashCode() + new Double(y).hashCode();
+		return new Double(x).hashCode() ^ new Double(y).hashCode();
 	}
 
 }

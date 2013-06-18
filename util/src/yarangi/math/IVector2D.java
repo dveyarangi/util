@@ -22,5 +22,8 @@ public interface IVector2D
 	public abstract Vector2D left();
 
 	public abstract double abs();
+	
+	public double crossZComponent(IVector2D v);
+	public double crossZComponent(double x, double y);
 
 }
