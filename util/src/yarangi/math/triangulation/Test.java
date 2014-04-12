@@ -1,2 +1,0 @@
-package yarangi.math.triangulation;
-
