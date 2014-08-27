@@ -11,26 +11,35 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 public class InvokationMapper
 
 {
-	
-	protected TObjectIntHashMap<String> rootsCount = new TObjectIntHashMap<String> (); 
+
+	protected TObjectIntHashMap<String> rootsCount = new TObjectIntHashMap<String> ();
+
+	public InvokationMapper()
+	{
+	}
 
 	/**
 	 * Marks object allocation event.
 	 * @param depth - depth of method invoker to trace
 	 */
-	public boolean record(int depth)
+	public boolean record(final int depth)
 	{
 		if(rootsCount == null)
+		{
 			rootsCount = new TObjectIntHashMap<String> ();
+		}
 		String root = new Exception().getStackTrace()[depth].toString();
 		if(rootsCount.contains( root ))
+		{
 			rootsCount.adjustValue( root, 1 );
-		else
+		} else
+		{
 			rootsCount.put( root, 1 );
-		
+		}
+
 		return true;
 	}
-	
+
 	/**
 	 * Prints allocation distribution.
 	 */
@@ -41,7 +50,13 @@ public class InvokationMapper
 		{
 			it.advance();
 			System.out.println(it.value() + " >>> " + it.key());
-			
+
 		}
+	}
+
+	public String getInvoker()
+	{
+		String invoker = new Exception().getStackTrace()[2].getClassName();
+		return invoker;
 	}
 }

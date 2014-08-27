@@ -1,4 +1,6 @@
-package yarangi.math;
+package yarangi.math.grids;
+
+import yarangi.math.FastMath;
 
 public class Histogram
 {

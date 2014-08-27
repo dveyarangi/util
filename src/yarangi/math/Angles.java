@@ -35,26 +35,22 @@ public class Angles
 		}
 	}
 
-	public static double SIN(double angle)
+	public static double SIN(final double angle)
 	{
-		if ( angle < 0 )
-			angle += TAU;
-		return SIN[toTrigoIndex( angle ) % FINESSE];
+		return SIN[toTrigoIndex( angle )];
 	}
 
-	public static double COS(double angle)
+	public static double COS(final double angle)
 	{
-		if ( angle < 0 )
-			angle += TAU;
-		return COS[toTrigoIndex( angle ) % FINESSE];
+		return COS[toTrigoIndex( angle )];
 	}
 
-	public static double atan2Deg(double y, double x)
+	public static double atan2Deg(final double y, final double x)
 	{
 		return Angles.atan2( y, x ) * TO_DEG;
 	}
 
-	public static final float atan2DegStrict(float y, float x)
+	public static final float atan2DegStrict(final float y, final float x)
 	{
 		return (float) (Math.atan2( y, x ) * TO_DEG);
 	}
@@ -92,7 +88,7 @@ public class Angles
 			add = 0.0f;
 		}
 
-		double invDiv = ATAN2_DIM_MINUS_1 / ((x < y) ? y : x);
+		double invDiv = ATAN2_DIM_MINUS_1 / (x < y ? y : x);
 
 		int xi = (int) (x * invDiv);
 		int yi = (int) (y * invDiv);
@@ -107,7 +103,7 @@ public class Angles
 	private static final int ATAN2_COUNT = ATAN2_MASK + 1;
 	private static final int ATAN2_DIM = (int) Math.sqrt( ATAN2_COUNT );
 
-	private static final float ATAN2_DIM_MINUS_1 = (ATAN2_DIM - 1);
+	private static final float ATAN2_DIM_MINUS_1 = ATAN2_DIM - 1;
 
 	private static final float[] atan2 = new float[ATAN2_COUNT];
 
@@ -125,41 +121,44 @@ public class Angles
 		}
 	}
 
-	private final static int toTrigoIndex(double angle)
+	private final static int toTrigoIndex(final double angle)
 	{
-		return FastMath.round( angle * INV_TRIG_STEP );
+		int idx = FastMath.round( angle * INV_TRIG_STEP ) % FINESSE;
+		if(idx < 0)
+			idx += FINESSE;
+		return idx;
 	}
 
-	public static double toRadians(double degrees)
+	public static double toRadians(final double degrees)
 	{
 		return degrees * TO_RAD;
 	}
 
-	public static double toDegrees(double radians)
+	public static double toDegrees(final double radians)
 	{
 		return radians * TO_DEG;
 	}
 
 	/**
 	 * Compresses the angle into [-180, 180] range.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
-	public static double normalize(double angle)
+	public static double normalize(final double angle)
 	{
 		return angle < -PI_div_2 ? angle + TAU : angle > PI_div_2 ? angle - TAU : angle;
 	}
 
 	/**
 	 * Adjusts the oldAngle in the closest direction to targetAngle by step.
-	 * 
+	 *
 	 * @param oldAngle
 	 * @param targetAngle
 	 * @param step
 	 * @return
 	 */
-	public static double stepTo(double oldAngle, double targetAngle, double step)
+	public static double stepTo(final double oldAngle, final double targetAngle, final double step)
 	{
 		double diff = normalize( oldAngle - targetAngle );
 		double absDiff = Math.abs( diff );
@@ -171,10 +170,10 @@ public class Angles
 	 * Steps the oldAngle towards the targetAngle, making last steps gradually
 	 * slowing down, for "softness" effect. A bit slower than the
 	 * {@link #stepTo(double, double, double)} operation.
-	 * 
+	 *
 	 * Reaches target after (abs(targetAngle-oldAngle) - step*softness) + log
 	 * b(1/softness) (step*softness)
-	 * 
+	 *
 	 * @param oldAngle
 	 * @param targetAngle
 	 * @param step
@@ -182,12 +181,12 @@ public class Angles
 	 * @param softness
 	 * @return
 	 */
-	public static double stepSoftly(double oldAngle, double targetAngle, double step, double softness)
+	public static double stepSoftly(final double oldAngle, final double targetAngle, final double step, final double softness)
 	{
 		double diff = normalize( oldAngle - targetAngle );
 		double absDiff = Math.abs( diff );
 
-		double dir = (diff < 0 ? 1 : -1);
+		double dir = diff < 0 ? 1 : -1;
 
 		if ( absDiff <= softness * step )
 		{
