@@ -82,7 +82,7 @@ public class Crayon
 				int lx = mx+px;
 				int ly = my+py;
 				float crayonCompression = crayon.at(lx,ly) - HCrayonMin + Havg;
-				crayon.put( lx, ly, crayonCompression );
+//				crayon.put( lx, ly, crayonCompression );
 			}
 		}
 	}

@@ -2,20 +2,20 @@ package yarangi.math;
 
 public class Angles
 {
-	public static final double PI = Math.PI;
-	public static final double TAU = Math.PI * 2;
-	public static final double PI_div_2 = Math.PI / 2;
-	public static final double PI_div_3 = Math.PI / 3;
-	public static final double PI_div_4 = Math.PI / 4;
-	public static final double PI_div_5 = Math.PI / 5;
-	public static final double PI_div_6 = Math.PI / 6;
-	public static final double PI_div_12 = Math.PI / 12;
-	public static final double PI_div_10 = Math.PI / 10;
-	public static final double PI_div_20 = Math.PI / 20;
-	public static final double PI_div_40 = Math.PI / 40;
+	public static final float PI = (float) Math.PI;
+	public static final float TAU = (float) Math.PI * 2;
+	public static final float PI_div_2 = (float) Math.PI / 2;
+	public static final float PI_div_3 = (float) Math.PI / 3;
+	public static final float PI_div_4 = (float) Math.PI / 4;
+	public static final float PI_div_5 = (float) Math.PI / 5;
+	public static final float PI_div_6 = (float) Math.PI / 6;
+	public static final float PI_div_12 = (float) Math.PI / 12;
+	public static final float PI_div_10 = (float) Math.PI / 10;
+	public static final float PI_div_20 = (float) Math.PI / 20;
+	public static final float PI_div_40 = (float) Math.PI / 40;
 
-	public static final double TO_RAD = PI / 180.;
-	public static final double TO_DEG = 180. / PI;
+	public static final float TO_RAD = PI / 180.f;
+	public static final float TO_DEG = 180.f / PI;
 
 	public static final int FINESSE = 720;
 

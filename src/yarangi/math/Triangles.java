@@ -3,10 +3,6 @@
  */
 package yarangi.math;
 
-import yarangi.math.IVector2D;
-import yarangi.math.Vector2D;
-
-import com.badlogic.gdx.math.Vector2;
 
 /**
  * @author dveyarangi
@@ -24,7 +20,7 @@ public class Triangles
 	 * @param target result
 	 * @return target
 	 */
-	public static Vector2 calcFromVertices(final Vector2 a, final float A, final Vector2 b, final float B, final Vector2 target, final boolean cw)
+/*	public static Vector2 calcFromVertices(final Vector2 a, final float A, final Vector2 b, final float B, final Vector2 target, final boolean cw)
 	{
 		// vector from a to b
 		Vector2 c = Vector2.tmp.set( b ).sub( a );
@@ -52,7 +48,7 @@ public class Triangles
 	public static boolean cwFrom(final Vector2 a, final Vector2 b, final Vector2 p)
 	{
 		return Vector2D.crossZComponent( b.x - a.x, b.y - a.y, p.x - a.x, p.y - a.y ) < 0;
-	}
+	}*/
 
 	public static boolean pointInTriangle(final IVector2D p, final IVector2D a, final IVector2D b, final IVector2D c)
 	{
@@ -83,7 +79,7 @@ public class Triangles
 			|| cross1 >= 0 && cross2 >= 0 && cross3 >= 0;
 	}
 
-	private static Vector2 calcCirrcumcentre(final Vector2 result, final Vector2 v1, final Vector2 v2, final Vector2 v3)
+/*	private static Vector2 calcCirrcumcentre(final Vector2 result, final Vector2 v1, final Vector2 v2, final Vector2 v3)
 	{
 		float Ax = v2.x - v1.x;
 		float Ay = v2.y - v1.y;
@@ -98,13 +94,13 @@ public class Triangles
 
 
 		result.set( v1 ).add( x, y )
-	}
+	}*/
 
 
-	public static void main(final String ... args)
+/*	public static void main(final String ... args)
 	{
 		Vector2 target = new Vector2();
 		calcFromVertices( new Vector2(0, 0), 4.24f, new Vector2(6, 0), 4.24f, target, true );
 		System.out.println(target);
-	}
+	}*/
 }

@@ -1,10 +1,17 @@
 package yarangi.math.curves;
 
-import com.badlogic.gdx.math.Vector2;
+import yarangi.math.Vector2D;
+
 
 public class BrokenLine implements ParametricCurve
 {
-	private final Vector2 [] points;
+
+	@Override
+	public Vector2D at(Vector2D target, float t) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+/*	private final Vector2 [] points;
 
 	private float [] lengths;
 
@@ -57,5 +64,5 @@ public class BrokenLine implements ParametricCurve
 
 		return target.set( points[idx]).add( tangents[idx].tmp().mul( (t - dt)*totalLength ) );
 	}
-
+*/
 }
