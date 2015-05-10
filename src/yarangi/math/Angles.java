@@ -19,8 +19,8 @@ public class Angles
 
 	public static final int FINESSE = 720;
 
-	private static final double[] SIN = new double[FINESSE];
-	private static final double[] COS = new double[FINESSE];
+	private static final float[] SIN = new float[FINESSE];
+	private static final float[] COS = new float[FINESSE];
 
 	public final static double TRIG_STEP = TAU / FINESSE;
 	public final static double INV_TRIG_STEP = FINESSE / TAU;
@@ -29,18 +29,18 @@ public class Angles
 		double angle = 0;
 		for ( int idx = 0; idx < FINESSE; idx++ )
 		{
-			SIN[idx] = Math.sin( angle );
-			COS[idx] = Math.cos( angle );
+			SIN[idx] = (float)Math.sin( angle );
+			COS[idx] = (float)Math.cos( angle );
 			angle += TRIG_STEP;
 		}
 	}
 
-	public static double SIN(final double angle)
+	public static float SIN(final double angle)
 	{
 		return SIN[toTrigoIndex( angle )];
 	}
 
-	public static double COS(final double angle)
+	public static float COS(final double angle)
 	{
 		return COS[toTrigoIndex( angle )];
 	}

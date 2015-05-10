@@ -34,6 +34,14 @@ public class RandomUtil
 	 * @param mean
 	 * @param sigma
 	 * @return
+	 */	public static float ASTD(final float mean, final float sigma)
+	{
+		return mean + (float)Math.abs(sigma * random.nextGaussian());
+	}	/**
+	 * Normal distribution around mean
+	 * @param mean
+	 * @param sigma
+	 * @return
 	 */	public static double STD(final double mean, final double sigma)
 	{
 		return mean + sigma * random.nextGaussian();
